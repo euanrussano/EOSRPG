@@ -16,6 +16,7 @@ import com.sophia.eosrpg.model.Location
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
+import com.sophia.eosrpg.model.trader.Trader
 import com.sophia.eosrpg.presenter.GamePresenter
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -24,6 +25,7 @@ import ktx.scene2d.*
 
 class GameScreen(val game: EOSRPG) : Screen {
 
+    private lateinit var tradeButton : Button
 
     private lateinit var weaponsTable: Table
 
@@ -225,6 +227,7 @@ class GameScreen(val game: EOSRPG) : Screen {
                     }
                     table {
                         it.grow()
+                        this.defaults().width(50f)
                         add()
                         textButton("North"){
                             moveNorthBtn = this
@@ -240,7 +243,13 @@ class GameScreen(val game: EOSRPG) : Screen {
                                 gamePresenter.moveHeroWest()
                             }
                         }
-                        add()
+                        textButton("Trade"){
+                            tradeButton = this
+                            isVisible = false
+                            onClick {
+                                TODO()
+                            }
+                        }
                         textButton("East"){
                             moveEastBtn = this
                             onClick {
@@ -397,6 +406,14 @@ class GameScreen(val game: EOSRPG) : Screen {
 
     fun updateHeroLevel(level: Int) {
         heroLevelLbl.txt = level.toString()
+    }
+
+    fun updateTrader(trader: Trader) {
+        tradeButton.isVisible = true
+    }
+
+    fun removeTrader() {
+        tradeButton.isVisible = false
     }
 
 

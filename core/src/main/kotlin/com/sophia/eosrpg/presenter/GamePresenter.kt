@@ -10,6 +10,9 @@ import com.sophia.eosrpg.model.monster.MonsterRepository
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.quest.QuestFactory
 import com.sophia.eosrpg.model.quest.QuestRepository
+import com.sophia.eosrpg.model.trader.Trader
+import com.sophia.eosrpg.model.trader.TraderFactory
+import com.sophia.eosrpg.model.trader.TraderRepository
 import com.sophia.eosrpg.screen.GameScreen
 
 class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener {
@@ -23,6 +26,9 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     val questRepository = QuestRepository()
     val questFactory = QuestFactory(questRepository, itemRepository)
 
+    val traderRepository = TraderRepository()
+    val traderFactory = TraderFactory(traderRepository, itemInstanceFactory)
+
     private val monsterRepository = MonsterRepository()
     private val monsterFactory = MonsterFactory(monsterRepository)
     private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository)
@@ -35,7 +41,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             value?.let { gameScreen.updateHero(it) }
         }
 
-    val worldFactory = WorldFactory(questRepository)
+    val worldFactory = WorldFactory(questRepository, traderRepository)
     var currentWorld = worldFactory.createWorld()
 
     var currentLocation = currentWorld.locationAt(0, 0)!!
@@ -45,6 +51,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             completeQuestsAtLocation()
             giveHeroQuestsAtLocation()
             getMonsterInstanceAtLocation();
+            currentTrader = field.traderHere
         }
 
 
@@ -70,6 +77,15 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             if (field == null){
                 gameScreen.clearMonsterInstance()
             }
+        }
+
+    var currentTrader : Trader? = null
+        set(value) {
+            field = value
+            if (field != null)
+                gameScreen.updateTrader(field!!)
+            else
+                gameScreen.removeTrader()
         }
 
 

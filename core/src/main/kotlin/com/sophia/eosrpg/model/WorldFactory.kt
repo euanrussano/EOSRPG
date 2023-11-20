@@ -1,9 +1,11 @@
 package com.sophia.eosrpg.model
 
 import com.sophia.eosrpg.model.quest.QuestRepository
+import com.sophia.eosrpg.model.trader.TraderRepository
 
 class WorldFactory(
-    val questRepository: QuestRepository
+    val questRepository: QuestRepository,
+    val traderRepository: TraderRepository
 ) {
     fun createWorld(): World {
         val locations = listOf(
@@ -13,12 +15,14 @@ class WorldFactory(
             ),
             Location(-1, -1, "Farmer's House",
                 "This is the house of your neighbor, Farmer Ted.",
+                traderHere = traderRepository.findByName("Farmer Ted")
             ),
             Location(0, -1, "Home",
             "This is your home",
             ),
             Location(-1, 0, "Trading Shop",
             "The shop of Susan, the trader.",
+                traderHere = traderRepository.findByName("Susan")
             ),
             Location(0, 0, "Town Square",
             "You see a fountain here.",
@@ -32,7 +36,8 @@ class WorldFactory(
             ),
             Location(0, 1, "Herbalist's Hut",
             "You see a small hut, with plants drying from the roof.",
-                    listOf(questRepository.findByName("Clear the herb garden"))
+                    listOf(questRepository.findByName("Clear the herb garden")),
+                    traderHere = traderRepository.findByName("Pete the Herbalist")
             ),
             Location(0, 2, "Herbalist's Garden",
             "There are many plants here, with snakes hiding behind them.",
