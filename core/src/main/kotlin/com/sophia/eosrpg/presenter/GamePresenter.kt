@@ -15,7 +15,7 @@ import com.sophia.eosrpg.model.trader.TraderFactory
 import com.sophia.eosrpg.model.trader.TraderRepository
 import com.sophia.eosrpg.screen.GameScreen
 
-class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener {
+class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener, Trader.TraderListener {
 
     val heroListener = HeroListenerPresenter(gameScreen)
 
@@ -81,7 +81,9 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     var currentTrader : Trader? = null
         set(value) {
+            field?.listener = null
             field = value
+            value?.listener = this
             if (field != null)
                 gameScreen.updateTrader(field!!)
             else
@@ -244,6 +246,25 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     }
 
+    fun heroSellItemInstance(itemInstance: ItemInstance) {
+        val hero = currentHero ?: return
+        val trader = currentTrader ?: return
+        hero.removeItemInstanceToInventory(itemInstance)
+        trader.addItemToInventory(itemInstance)
+        hero.gold += itemInstance.item.price
+    }
+
+    fun heroBuyItemInstance(itemInstance: ItemInstance) {
+        val hero = currentHero ?: return
+        val trader = currentTrader ?: return
+        if (hero.gold < itemInstance.item.price) return
+        
+        trader.removeItemFromInventory(itemInstance)
+        hero.addItemInstanceToInventory(itemInstance)
+        hero.gold -= itemInstance.item.price
+
+    }
+
 
     class HeroListenerPresenter(val gameScreen: GameScreen) : Hero.HeroListener {
         override fun itemInstanceAddedToInventory(hero: Hero, itemInstance: ItemInstance) {
@@ -323,6 +344,14 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             gameScreen.raiseMessage("You were hit for ${amountLost} hit points.")
         }
 
+    }
+
+    override fun itemInstanceAddedToInventory(trader: Trader, itemInstance: ItemInstance) {
+        gameScreen.updateTrader(trader)
+    }
+
+    override fun itemInstanceRemovedFromInventory(trader: Trader, itemInstance: ItemInstance) {
+        gameScreen.updateTrader(trader)
     }
 
 

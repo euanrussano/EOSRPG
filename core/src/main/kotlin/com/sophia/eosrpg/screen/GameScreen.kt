@@ -26,6 +26,7 @@ import ktx.scene2d.*
 class GameScreen(val game: EOSRPG) : Screen {
 
     private lateinit var tradeButton : Button
+    private lateinit var tradeWindow: TradeWindow
 
     private lateinit var weaponsTable: Table
 
@@ -247,7 +248,7 @@ class GameScreen(val game: EOSRPG) : Screen {
                             tradeButton = this
                             isVisible = false
                             onClick {
-                                TODO()
+                                stage.addActor(tradeWindow)
                             }
                         }
                         textButton("East"){
@@ -269,9 +270,13 @@ class GameScreen(val game: EOSRPG) : Screen {
                 }
             }
         }
+        gamePresenter = GamePresenter(this)
+
+        tradeWindow = TradeWindow(gamePresenter)
+
 
         Gdx.input.inputProcessor = uiStage
-        gamePresenter = GamePresenter(this)
+
         gamePresenter.initialize()
     }
 
@@ -316,6 +321,8 @@ class GameScreen(val game: EOSRPG) : Screen {
         updateHeroQuests(currentHero.questStatus)
         updateHeroWeapons(currentHero.weapons)
         updateHeroCurrentWeapon(currentHero.currentWeapon)
+
+        tradeWindow.updateHeroInventory(currentHero.inventory)
     }
 
     fun updateHeroQuests(questStatus : Map<Quest, Boolean>) {
@@ -341,6 +348,8 @@ class GameScreen(val game: EOSRPG) : Screen {
             inventoryTable.row()
         }
         updateHeroWeapons(inventory)
+
+        tradeWindow.updateHeroInventory(inventory)
     }
 
     fun updateHeroWeapons(inventory: List<ItemInstance>) {
@@ -410,10 +419,13 @@ class GameScreen(val game: EOSRPG) : Screen {
 
     fun updateTrader(trader: Trader) {
         tradeButton.isVisible = true
+        tradeWindow.updateTraderName(trader.name)
+        tradeWindow.updateTraderInventory(trader.inventory)
     }
 
     fun removeTrader() {
         tradeButton.isVisible = false
+        tradeWindow.updateTraderInventory(listOf())
     }
 
 
