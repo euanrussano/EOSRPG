@@ -210,8 +210,8 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         }
         val heroWeapon = hero.currentWeapon ?: return
 
-        val damageItem = (heroWeapon.item as CompositeItem).get(DamageItem::class) as DamageItem
-        val damageToMonster = MathUtils.random(damageItem.minimumDamage, damageItem.maximumDamage)
+        val damageItemComponent = (heroWeapon.item as Item).get(DamageItemComponent::class) as DamageItemComponent
+        val damageToMonster = MathUtils.random(damageItemComponent.minimumDamage, damageItemComponent.maximumDamage)
         if (damageToMonster == 0){
             gameScreen.raiseMessage("You missed the ${monsterInstance.monster.name}")
         } else {

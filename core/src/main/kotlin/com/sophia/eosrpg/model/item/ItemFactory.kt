@@ -6,14 +6,14 @@ class ItemFactory (
 
     init {
         val items = listOf<Item>(
-            CompositeItem().apply { add(BaseItem("Pointy Stick", 1)); add(DamageItem(1,2)) },
-            CompositeItem().apply { add(BaseItem("Rusty Sword", 5)); add(DamageItem(1,3)) },
-            BaseItem("Snake Fang", 1),
-            BaseItem("Snake Skin", 2),
-            BaseItem("Rat Tail", 1),
-            BaseItem("Rat Fur", 2),
-            BaseItem("Spider Fang", 1),
-            BaseItem("Spider Silk", 2),
+            Item("Pointy Stick", 1).apply { add(DamageItemComponent(1,2)) },
+            Item("Rusty Sword", 5).apply { add(DamageItemComponent(1,3)) },
+            Item("Snake Fang", 1),
+            Item("Snake Skin", 2),
+            Item("Rat Tail", 1),
+            Item("Rat Fur", 2),
+            Item("Spider Fang", 1),
+            Item("Spider Silk", 2),
         )
 
         itemRepository.saveAll(items)

@@ -10,7 +10,7 @@ class QuestFactory(
         val quest = Quest(
             "Clear the herb garden",
             "Defeat the snakes in the Herbalist's garden",
-            CollectItemsQuestTask(mapOf("Snake Fang" to 1)),
+            CollectItemsQuestTask(mapOf("Snake Fang" to 2)),
             CompositeQuestReward(
                 XPQuestReward(25),
                 GoldQuestReward(10),

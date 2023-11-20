@@ -1,9 +1,7 @@
 package com.sophia.eosrpg.model
 
-import com.sophia.eosrpg.model.item.CompositeItem
-import com.sophia.eosrpg.model.item.DamageItem
-import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.quest.Quest
 
 class Hero(
@@ -83,6 +81,7 @@ class Hero(
             else
                 listener?.heroLostGold(this, diff)
         }
+
 
     override val inventory = Inventory(this)
 

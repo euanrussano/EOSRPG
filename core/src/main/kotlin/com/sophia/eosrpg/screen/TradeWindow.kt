@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.Window
-import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.presenter.GamePresenter
 import ktx.actors.centerPosition
@@ -86,6 +85,7 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
             heroInventoryTable.add(itemInstances.size.toString())
             heroInventoryTable.add(price.toString())
             heroInventoryTable.add(scene2d.textButton("Sell 1"){
+                this.pad(5f)
                 onClick {
                     gamePresenter.heroSellItemInstance(itemInstances.first())
                 }
@@ -110,6 +110,7 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
             traderInventoryTable.add(itemInstances.size.toString())
             traderInventoryTable.add(price.toString())
             traderInventoryTable.add(scene2d.textButton("Buy 1"){
+                this.pad(5f)
                 onClick {
                     gamePresenter.heroBuyItemInstance(itemInstances.first())
                 }

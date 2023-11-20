@@ -11,8 +11,10 @@ class CollectItemsQuestTask(
 
     override fun perform(hero: Hero) {
         for ((itemName, qty) in itemsToComplete) {
-            val itemInstance1 = hero.inventory.findByName(itemName)
-            hero.inventory.removeItemInstanceToInventory(itemInstance1)
+            for (i in 0 until qty){
+                val itemInstance1 = hero.inventory.findByName(itemName)
+                hero.inventory.removeItemInstanceToInventory(itemInstance1)
+            }
         }
 
     }

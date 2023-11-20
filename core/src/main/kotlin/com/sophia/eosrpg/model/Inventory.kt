@@ -3,8 +3,8 @@ package com.sophia.eosrpg.model
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
 import com.badlogic.gdx.ai.msg.Telegraph
-import com.sophia.eosrpg.model.item.CompositeItem
-import com.sophia.eosrpg.model.item.DamageItem
+import com.sophia.eosrpg.model.item.Item
+import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.ItemInstance
 
 class Inventory(val owner : InventoryHolder) : Telegraph {
@@ -15,8 +15,8 @@ class Inventory(val owner : InventoryHolder) : Telegraph {
     val weapons : List<ItemInstance>
         get() = __itemInstances.filter { itemInstance ->
             val item = itemInstance.item
-            if (item is CompositeItem){
-                return@filter item.has(DamageItem::class)
+            if (item is Item){
+                return@filter item.has(DamageItemComponent::class)
             }else{
                 false
             }
