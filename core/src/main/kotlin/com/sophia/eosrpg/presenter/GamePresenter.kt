@@ -1,5 +1,8 @@
 package com.sophia.eosrpg.presenter
 
+import com.badlogic.gdx.ai.msg.MessageManager
+import com.badlogic.gdx.ai.msg.Telegram
+import com.badlogic.gdx.ai.msg.Telegraph
 import com.badlogic.gdx.math.MathUtils
 import com.sophia.eosrpg.model.*
 import com.sophia.eosrpg.model.item.*
@@ -15,7 +18,7 @@ import com.sophia.eosrpg.model.trader.TraderFactory
 import com.sophia.eosrpg.model.trader.TraderRepository
 import com.sophia.eosrpg.screen.GameScreen
 
-class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener, Trader.TraderListener {
+class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener, Telegraph { // Trader.TraderListener,
 
     val heroListener = HeroListenerPresenter(gameScreen)
 
@@ -31,7 +34,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     private val monsterRepository = MonsterRepository()
     private val monsterFactory = MonsterFactory(monsterRepository)
-    private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository)
+    private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository, itemInstanceFactory)
 
     var currentHero : Hero? = null
         set(value) {
@@ -81,15 +84,21 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     var currentTrader : Trader? = null
         set(value) {
-            field?.listener = null
+//            field?.listener = null
             field = value
-            value?.listener = this
+//            value?.listener = this
             if (field != null)
                 gameScreen.updateTrader(field!!)
             else
                 gameScreen.removeTrader()
         }
 
+    init {
+        MessageManager.getInstance().addListeners(this,
+            Messages.ItemInstanceAddedEvent.code,
+            Messages.ItemInstanceRemovedEvent.code,
+            )
+    }
 
 
     fun initialize() {
@@ -101,7 +110,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         1,
         10_000
          ).apply {
-            addItemInstanceToInventory(
+            inventory.addItemInstanceToInventory(
                 itemInstanceFactory.createItemInstance("Pointy Stick"),
             )
         }
@@ -215,14 +224,10 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
             val xpPoints = monsterInstance.monster.rewardExperiencePoints
             hero.experiencePoints += xpPoints
-            //gameScreen.raiseMessage("You received ${xpPoints} experience points.")
             val gold = monsterInstance.monster.rewardGold
             hero.gold += gold
-            for ((itemName, qty) in monsterInstance.inventory) {
-                for (i in 0 until qty){
-                    val itemInstance = itemInstanceFactory.createItemInstance(itemName)
-                    hero.addItemInstanceToInventory(itemInstance)
-                }
+            for (itemInstance in monsterInstance.inventory.itemInstances) {
+                hero.inventory.addItemInstanceToInventory(itemInstance)
             }
             getMonsterInstanceAtLocation()
         }
@@ -249,8 +254,8 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     fun heroSellItemInstance(itemInstance: ItemInstance) {
         val hero = currentHero ?: return
         val trader = currentTrader ?: return
-        hero.removeItemInstanceToInventory(itemInstance)
-        trader.addItemToInventory(itemInstance)
+        hero.inventory.removeItemInstanceToInventory(itemInstance)
+        trader.inventory.addItemInstanceToInventory(itemInstance)
         hero.gold += itemInstance.item.price
     }
 
@@ -258,26 +263,26 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         val hero = currentHero ?: return
         val trader = currentTrader ?: return
         if (hero.gold < itemInstance.item.price) return
-        
-        trader.removeItemFromInventory(itemInstance)
-        hero.addItemInstanceToInventory(itemInstance)
+
+        trader.inventory.removeItemInstanceToInventory(itemInstance)
+        hero.inventory.addItemInstanceToInventory(itemInstance)
         hero.gold -= itemInstance.item.price
 
     }
 
 
     class HeroListenerPresenter(val gameScreen: GameScreen) : Hero.HeroListener {
-        override fun itemInstanceAddedToInventory(hero: Hero, itemInstance: ItemInstance) {
-            gameScreen.updateHeroInventory(hero.inventory)
-            gameScreen.updateHeroWeapons(hero.weapons)
-            gameScreen.updateHeroCurrentWeapon(hero.currentWeapon)
-            gameScreen.raiseMessage("You received a ${itemInstance.item.name}")
-        }
-
-        override fun itemInstanceRemovedFromInventory(hero: Hero, itemInstance: ItemInstance) {
-            gameScreen.updateHeroInventory(hero.inventory)
-            gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
-        }
+//        override fun itemInstanceAddedToInventory(hero: Hero, itemInstance: ItemInstance) {
+//            gameScreen.updateHeroInventory(hero.inventory)
+//            gameScreen.updateHeroWeapons(hero.weapons)
+//            gameScreen.updateHeroCurrentWeapon(hero.currentWeapon)
+//            gameScreen.raiseMessage("You received a ${itemInstance.item.name}")
+//        }
+//
+//        override fun itemInstanceRemovedFromInventory(hero: Hero, itemInstance: ItemInstance) {
+//            gameScreen.updateHeroInventory(hero.inventory)
+//            gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
+//        }
 
         override fun heroGainedGold(hero: Hero, amountGained: Int) {
             gameScreen.updateHeroGold(hero.gold)
@@ -346,12 +351,52 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     }
 
-    override fun itemInstanceAddedToInventory(trader: Trader, itemInstance: ItemInstance) {
-        gameScreen.updateTrader(trader)
+//    override fun itemInstanceAddedToInventory(trader: Trader, itemInstance: ItemInstance) {
+//        gameScreen.updateTrader(trader)
+//    }
+//
+//    override fun itemInstanceRemovedFromInventory(trader: Trader, itemInstance: ItemInstance) {
+//        gameScreen.updateTrader(trader)
+//    }
+
+    override fun handleMessage(msg: Telegram): Boolean {
+        when(msg.message){
+            Messages.ItemInstanceAddedEvent.code -> return onItemInstanceAddedEvent(msg.extraInfo as Messages.ItemInstanceAddedEvent)
+            Messages.ItemInstanceRemovedEvent.code -> return onItemInstanceRemovedEvent(msg.extraInfo as Messages.ItemInstanceRemovedEvent)
+        }
+        return false
     }
 
-    override fun itemInstanceRemovedFromInventory(trader: Trader, itemInstance: ItemInstance) {
-        gameScreen.updateTrader(trader)
+    private fun onItemInstanceRemovedEvent(event: Messages.ItemInstanceRemovedEvent): Boolean {
+        val owner = event.inventory.owner
+        if (owner is Hero) {
+            val itemInstance = event.itemInstance
+
+            gameScreen.updateHeroInventory(owner.inventory.itemInstances)
+            gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
+            return true
+        } else if (owner is Trader){
+            gameScreen.updateTrader(owner)
+            return true
+        }
+        return false
+    }
+
+    private fun onItemInstanceAddedEvent(event: Messages.ItemInstanceAddedEvent): Boolean {
+        val owner = event.inventory.owner
+        if (owner is Hero) {
+            val itemInstance = event.itemInstance
+
+            gameScreen.updateHeroInventory(owner.inventory.itemInstances)
+            gameScreen.updateHeroWeapons(owner.inventory.weapons)
+            gameScreen.updateHeroCurrentWeapon(owner.currentWeapon)
+            gameScreen.raiseMessage("You received a ${itemInstance.item.name}")
+            return true
+        } else if (owner is Trader){
+            gameScreen.updateTrader(owner)
+            return true
+        }
+        return false
     }
 
 

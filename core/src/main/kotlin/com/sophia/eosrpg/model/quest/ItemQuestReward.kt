@@ -11,7 +11,7 @@ class ItemQuestReward(
     override fun giveTo(hero: Hero) {
         for ((rewardItem, qty) in rewardItems) {
             for (i in 0 until qty){
-                hero.addItemInstanceToInventory(ItemInstance(rewardItem))
+                hero.inventory.addItemInstanceToInventory(ItemInstance(rewardItem))
             }
         }
     }

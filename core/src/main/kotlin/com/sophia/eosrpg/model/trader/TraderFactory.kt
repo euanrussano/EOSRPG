@@ -11,11 +11,11 @@ class TraderFactory(
 
     init {
         val susan = Trader("Susan")
-        susan.addItemToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        susan.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         val farmerTed = Trader("Farmer Ted")
-        farmerTed.addItemToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        farmerTed.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         val peteTheHerbalist = Trader("Pete the Herbalist")
-        peteTheHerbalist.addItemToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        peteTheHerbalist.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         traderRepository.save(susan)
         traderRepository.save(farmerTed)
         traderRepository.save(peteTheHerbalist)

@@ -1,5 +1,7 @@
 package com.sophia.eosrpg.model.item
 
+import com.badlogic.gdx.utils.Pool
+
 class ItemInstanceFactory(
     val itemRepository : ItemRepository
 ) {

@@ -13,14 +13,12 @@ class Hero(
     experiencePoints : Int,
     level : Int,
     gold : Int
-) {
+) : InventoryHolder {
 
 
     var listener : HeroListener? = null
 
     interface HeroListener {
-        fun itemInstanceAddedToInventory(hero: Hero, itemInstance: ItemInstance)
-        fun itemInstanceRemovedFromInventory(hero: Hero, itemInstance: ItemInstance)
         fun heroGainedGold(hero: Hero, amountGained : Int)
         fun heroLostGold(hero: Hero, amountLost : Int)
         fun updateHeroName(hero: Hero)
@@ -86,43 +84,7 @@ class Hero(
                 listener?.heroLostGold(this, diff)
         }
 
-    private var __inventory = listOf<ItemInstance>()
-    val inventory : List<ItemInstance>
-        get() = __inventory
-    val weapons : List<ItemInstance>
-        get() = __inventory.filter { itemInstance ->
-            val item = itemInstance.item
-            if (item is CompositeItem){
-                return@filter item.has(DamageItem::class)
-            }else{
-                false
-            }
-        }
-
-    fun addItemInstanceToInventory(itemInstance: ItemInstance) {
-        val inventory = this.__inventory.toMutableList()
-        inventory.add(itemInstance)
-        this.__inventory = inventory
-        listener?.itemInstanceAddedToInventory(this, itemInstance)
-    }
-
-    fun removeItemInstanceToInventory(itemInstance: ItemInstance) {
-        val inventory = this.__inventory.toMutableList()
-        val isRemoved = inventory.remove(itemInstance)
-        if (isRemoved){
-            this.__inventory = inventory
-            listener?.itemInstanceRemovedFromInventory(this, itemInstance)
-        }
-    }
-    fun hasAllItems(itemQuantity : Map<String, Int>) : Boolean{
-        for ((itemName, qty) in itemQuantity){
-            val count = __inventory.count { itemInstance -> itemInstance.item.name == itemName }
-            if (count < qty) return false
-        }
-        return true
-    }
-
-
+    override val inventory = Inventory(this)
 
     private var __questStatus = mutableMapOf<Quest, Boolean>()
     val questStatus : Map<Quest, Boolean>
@@ -150,7 +112,7 @@ class Hero(
 
     fun equipWeapon(weapon: Item) {
         println("equipping")
-        currentWeapon = weapons.firstOrNull { itemInstance -> itemInstance.item == weapon }
+        currentWeapon = inventory.weapons.firstOrNull { itemInstance -> itemInstance.item == weapon }
     }
 
     fun unequipWeapon() {

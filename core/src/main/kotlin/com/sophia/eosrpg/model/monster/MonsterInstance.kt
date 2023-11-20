@@ -1,10 +1,14 @@
 package com.sophia.eosrpg.model.monster
 
+import com.sophia.eosrpg.model.Inventory
+import com.sophia.eosrpg.model.InventoryHolder
+
 class MonsterInstance(
     val monster : Monster,
-    val inventory : Map<String, Int>
-) {
+) : InventoryHolder {
+
     var listener: MonsterListener? = null
+    override val inventory = Inventory(this)
 
     interface MonsterListener {
         fun updateMonsterInstance(monsterInstance: MonsterInstance)

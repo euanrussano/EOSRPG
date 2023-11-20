@@ -1,10 +1,14 @@
 package com.sophia.eosrpg.screen
 
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.Window
+import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.presenter.GamePresenter
+import ktx.actors.centerPosition
 import ktx.actors.onClick
 import ktx.actors.txt
 import ktx.scene2d.*
@@ -18,13 +22,14 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
     init {
         isModal = true
         isMovable = true
+        background = skin.newDrawable("white", Color.LIGHT_GRAY)
         titleTable.add(scene2d.textButton("X"){
             onClick {
                 this@TradeWindow.remove()
             }
         }).right()
         val table = scene2d.table {
-            this.defaults().pad(10f)
+            this.defaults().pad(10f).top().left()
             label("<Trader Name>"){
                 it.colspan(2)
                 traderNameLbl = this
@@ -35,11 +40,13 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
             row()
             table {
                 it.grow()
+                this.defaults().pad(10f)
                 background = skin.getDrawable("white")
                 heroInventoryTable = this
             }
             table {
                 it.grow()
+                this.defaults().pad(10f)
                 background = skin.getDrawable("white")
                 traderInventoryTable = this
             }
@@ -57,18 +64,30 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
         pack()
     }
 
+    override fun setStage(stage: Stage?) {
+        super.setStage(stage)
+        stage?.let {
+            centerPosition(stage.width ,stage.height)
+        }
+    }
+
     fun updateHeroInventory(inventory : List<ItemInstance> ){
         heroInventoryTable.clearChildren()
         heroInventoryTable.add("Description")
+        heroInventoryTable.add("Qty")
         heroInventoryTable.add("Price")
         heroInventoryTable.add()
         heroInventoryTable.row()
-        for (itemInstance in inventory){
-            heroInventoryTable.add(itemInstance.item.name)
-            heroInventoryTable.add(itemInstance.item.price.toString())
-            heroInventoryTable.add(scene2d.textButton("Sell"){
+        val count = inventory.groupBy { it.item }.toSortedMap(compareBy{ it.name })
+        for ((item, itemInstances) in count) {
+            val itemName = item.name
+            val price = item.price
+            heroInventoryTable.add(itemName)
+            heroInventoryTable.add(itemInstances.size.toString())
+            heroInventoryTable.add(price.toString())
+            heroInventoryTable.add(scene2d.textButton("Sell 1"){
                 onClick {
-                    gamePresenter.heroSellItemInstance(itemInstance)
+                    gamePresenter.heroSellItemInstance(itemInstances.first())
                 }
             })
             heroInventoryTable.row()
@@ -79,15 +98,20 @@ class TradeWindow(val gamePresenter: GamePresenter) : Window("Trade", Scene2DSki
     fun updateTraderInventory(inventory : List<ItemInstance> ){
         traderInventoryTable.clearChildren()
         traderInventoryTable.add("Description")
+        traderInventoryTable.add("Qty")
         traderInventoryTable.add("Price")
         traderInventoryTable.add()
         traderInventoryTable.row()
-        for (itemInstance in inventory){
-            traderInventoryTable.add(itemInstance.item.name)
-            traderInventoryTable.add(itemInstance.item.price.toString())
-            traderInventoryTable.add(scene2d.textButton("Buy"){
+        val count = inventory.groupBy { it.item }.toSortedMap(compareBy{ it.name })
+        for ((item, itemInstances) in count) {
+            val itemName = item.name
+            val price = item.price
+            traderInventoryTable.add(itemName)
+            traderInventoryTable.add(itemInstances.size.toString())
+            traderInventoryTable.add(price.toString())
+            traderInventoryTable.add(scene2d.textButton("Buy 1"){
                 onClick {
-                    gamePresenter.heroBuyItemInstance(itemInstance)
+                    gamePresenter.heroBuyItemInstance(itemInstances.first())
                 }
             })
             traderInventoryTable.row()

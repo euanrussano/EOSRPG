@@ -6,13 +6,13 @@ class CollectItemsQuestTask(
     val itemsToComplete : Map<String, Int>
 ) : QuestTask {
     override fun canPerform(hero: Hero): Boolean {
-        return hero.hasAllItems(itemsToComplete)
+        return hero.inventory.hasAllItems(itemsToComplete)
     }
 
     override fun perform(hero: Hero) {
         for ((itemName, qty) in itemsToComplete) {
-            val itemInstance1 = hero.inventory.first { itemInstance -> itemInstance.item.name == itemName }
-            hero.removeItemInstanceToInventory(itemInstance1)
+            val itemInstance1 = hero.inventory.findByName(itemName)
+            hero.inventory.removeItemInstanceToInventory(itemInstance1)
         }
 
     }

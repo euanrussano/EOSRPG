@@ -317,12 +317,12 @@ class GameScreen(val game: EOSRPG) : Screen {
         heroGoldLbl.txt = currentHero.gold.toString()
         heroXPLbl.txt = currentHero.experiencePoints.toString()
 
-        updateHeroInventory(currentHero.inventory)
+        updateHeroInventory(currentHero.inventory.itemInstances)
         updateHeroQuests(currentHero.questStatus)
-        updateHeroWeapons(currentHero.weapons)
+        updateHeroWeapons(currentHero.inventory.weapons)
         updateHeroCurrentWeapon(currentHero.currentWeapon)
 
-        tradeWindow.updateHeroInventory(currentHero.inventory)
+        tradeWindow.updateHeroInventory(currentHero.inventory.itemInstances)
     }
 
     fun updateHeroQuests(questStatus : Map<Quest, Boolean>) {
@@ -340,11 +340,17 @@ class GameScreen(val game: EOSRPG) : Screen {
     fun updateHeroInventory(inventory: List<ItemInstance>) {
         inventoryTable.clearChildren()
         inventoryTable.add("Name").growX()
+        inventoryTable.add("Qty")
         inventoryTable.add("Price")
         inventoryTable.row()
-        for (itemInstance in inventory) {
-            inventoryTable.add(itemInstance.item.name).growX()
-            inventoryTable.add(itemInstance.item.price.toString())
+        val itemNames = inventory.map { itemInstance -> itemInstance.item }
+        val count = itemNames.groupingBy { it.name to it.price }.eachCount()
+        for ((pair, qty) in count) {
+            val itemName = pair.first
+            val price = pair.second
+            inventoryTable.add(itemName).growX()
+            inventoryTable.add(qty.toString())
+            inventoryTable.add(price.toString())
             inventoryTable.row()
         }
         updateHeroWeapons(inventory)
@@ -420,7 +426,7 @@ class GameScreen(val game: EOSRPG) : Screen {
     fun updateTrader(trader: Trader) {
         tradeButton.isVisible = true
         tradeWindow.updateTraderName(trader.name)
-        tradeWindow.updateTraderInventory(trader.inventory)
+        tradeWindow.updateTraderInventory(trader.inventory.itemInstances)
     }
 
     fun removeTrader() {
