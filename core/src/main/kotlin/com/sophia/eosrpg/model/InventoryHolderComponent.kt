@@ -2,13 +2,10 @@ package com.sophia.eosrpg.model
 
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
-import com.badlogic.gdx.ai.msg.Telegraph
-import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.ItemInstance
 
-class Inventory(val owner : InventoryHolder) : Telegraph {
-
+class InventoryHolderComponent(val owner: Entity) : EntityComponent {
     private val __itemInstances = mutableListOf<ItemInstance>()
     val itemInstances : List<ItemInstance>
         get() = __itemInstances
@@ -18,16 +15,16 @@ class Inventory(val owner : InventoryHolder) : Telegraph {
     fun addItemInstanceToInventory(itemInstance: ItemInstance) {
         __itemInstances.add(itemInstance)
         val code = Messages.ItemInstanceAddedEvent.code
-        val event = Messages.ItemInstanceAddedEvent(this, itemInstance)
-        MessageManager.getInstance().dispatchMessage(this, code, event)
+        val event = Messages.ItemInstanceAddedEvent(owner, itemInstance)
+        MessageManager.getInstance().dispatchMessage(code, event)
     }
 
     fun removeItemInstanceToInventory(itemInstance: ItemInstance) {
         val isRemoved = __itemInstances.remove(itemInstance)
         if (isRemoved){
             val code = Messages.ItemInstanceRemovedEvent.code
-            val event = Messages.ItemInstanceRemovedEvent(this, itemInstance)
-            MessageManager.getInstance().dispatchMessage(this, code, event)
+            val event = Messages.ItemInstanceRemovedEvent(owner, itemInstance)
+            MessageManager.getInstance().dispatchMessage(code, event)
         }
     }
     fun hasAllItems(itemQuantity : Map<String, Int>) : Boolean{
@@ -38,11 +35,15 @@ class Inventory(val owner : InventoryHolder) : Telegraph {
         return true
     }
 
-    override fun handleMessage(msg: Telegram?): Boolean {
-        TODO("Not yet implemented")
-    }
 
     fun findByName(itemName: String): ItemInstance {
         return __itemInstances.first { itemInstance -> itemInstance.item.name == itemName }
     }
+
+    companion object {
+        fun get(target: Entity): InventoryHolderComponent {
+            return target.components.first { it is InventoryHolderComponent } as InventoryHolderComponent
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sophia.eosrpg.model.monster
 
 import com.badlogic.gdx.math.MathUtils
+import com.sophia.eosrpg.model.InventoryHolderComponent
 import com.sophia.eosrpg.model.item.ItemInstanceFactory
 
 class MonsterInstanceFactory(
@@ -13,6 +14,7 @@ class MonsterInstanceFactory(
         val monster = monsterRepository.findByName(name)
 
         val monsterInstance = MonsterInstance(monster)
+        val monsterInventory = InventoryHolderComponent.get(monsterInstance)
 
         var runningTotal = 0
         val p = MathUtils.random()
@@ -20,7 +22,7 @@ class MonsterInstanceFactory(
             runningTotal += prob
             if (p <= runningTotal/100f){
                 val itemInstance = itemInstanceFactory.createItemInstance(itemName)
-                monsterInstance.inventory.addItemInstanceToInventory(itemInstance)
+                monsterInventory.addItemInstanceToInventory(itemInstance)
             }
         }
         return monsterInstance

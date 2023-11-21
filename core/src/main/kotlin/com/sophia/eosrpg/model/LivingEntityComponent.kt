@@ -31,10 +31,12 @@ class LivingEntityComponent(val owner : Entity, private var maximumHitPoints : I
         MessageManager.getInstance().dispatchMessage(code, event)
     }
     fun heal(amount : Int) {
-        __hitPoints = min(__hitPoints + amount, maximumHitPoints)
-        val event = Messages.EntityWasHealed(owner, amount)
-        val code = Messages.EntityWasHealed.code
-        MessageManager.getInstance().dispatchMessage(code, event)
+        if (__hitPoints < maximumHitPoints){
+            __hitPoints = min(__hitPoints + amount, maximumHitPoints)
+            val event = Messages.EntityWasHealed(owner, amount)
+            val code = Messages.EntityWasHealed.code
+            MessageManager.getInstance().dispatchMessage(code, event)
+        }
     }
 
     companion object {

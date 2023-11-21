@@ -1,12 +1,15 @@
 package com.sophia.eosrpg.model.trader
 
-import com.sophia.eosrpg.model.Inventory
-import com.sophia.eosrpg.model.InventoryHolder
-import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.Entity
+import com.sophia.eosrpg.model.InventoryHolderComponent
 
 class Trader(
     val name : String,
-) : InventoryHolder {
+) : Entity() {
+
+    init {
+        add(InventoryHolderComponent(this))
+    }
 //    var listener : TraderListener? = null
 //
 //    interface TraderListener {
@@ -14,7 +17,7 @@ class Trader(
 //        fun itemInstanceRemovedFromInventory(trader: Trader, itemInstance: ItemInstance)
 //
 //    }
-    override val inventory = Inventory(this)
+//    override val inventory = Inventory(this)
 
 //    private val __inventory : MutableList<ItemInstance> = mutableListOf()
 //    val inventory : List<ItemInstance>

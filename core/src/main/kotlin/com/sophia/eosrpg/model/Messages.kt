@@ -7,13 +7,13 @@ object Messages {
     fun nextInt() = value++
 
     // -------INVENTORY EVENTS-------------------
-    class ItemInstanceAddedEvent(val inventory: Inventory, val itemInstance: ItemInstance) {
+    class ItemInstanceAddedEvent(val owner: Entity, val itemInstance: ItemInstance) {
         companion object {
             val code: Int = nextInt()
         }
 
     }
-    class ItemInstanceRemovedEvent(val inventory: Inventory, val itemInstance: ItemInstance) {
+    class ItemInstanceRemovedEvent(val owner: Entity, val itemInstance: ItemInstance) {
         companion object {
             val code: Int = nextInt()
         }

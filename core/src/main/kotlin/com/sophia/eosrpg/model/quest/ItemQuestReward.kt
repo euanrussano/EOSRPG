@@ -1,6 +1,7 @@
 package com.sophia.eosrpg.model.quest
 
 import com.sophia.eosrpg.model.Hero
+import com.sophia.eosrpg.model.InventoryHolderComponent
 import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
 
@@ -11,7 +12,8 @@ class ItemQuestReward(
     override fun giveTo(hero: Hero) {
         for ((rewardItem, qty) in rewardItems) {
             for (i in 0 until qty){
-                hero.inventory.addItemInstanceToInventory(ItemInstance(rewardItem))
+                val heroInventory = InventoryHolderComponent.get(hero)
+                heroInventory.addItemInstanceToInventory(ItemInstance(rewardItem))
             }
         }
     }

@@ -115,8 +115,12 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         1,
         10_000
          ).apply {
+             val inventory = InventoryHolderComponent.get(this)
             inventory.addItemInstanceToInventory(
                 itemInstanceFactory.createItemInstance("Pointy Stick"),
+            )
+            inventory.addItemInstanceToInventory(
+                itemInstanceFactory.createItemInstance("Granola Bar"),
             )
         }
         gameScreen.updateHero(currentHero!!)
@@ -264,8 +268,11 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     fun heroSellItemInstance(itemInstance: ItemInstance) {
         val hero = currentHero ?: return
         val trader = currentTrader ?: return
-        hero.inventory.removeItemInstanceToInventory(itemInstance)
-        trader.inventory.addItemInstanceToInventory(itemInstance)
+        val heroInventory = InventoryHolderComponent.get(hero)
+        val traderInventory = InventoryHolderComponent.get(trader)
+
+        heroInventory.removeItemInstanceToInventory(itemInstance)
+        traderInventory.addItemInstanceToInventory(itemInstance)
         hero.gold += itemInstance.item.price
     }
 
@@ -274,8 +281,11 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         val trader = currentTrader ?: return
         if (hero.gold < itemInstance.item.price) return
 
-        trader.inventory.removeItemInstanceToInventory(itemInstance)
-        hero.inventory.addItemInstanceToInventory(itemInstance)
+        val heroInventory = InventoryHolderComponent.get(hero)
+        val traderInventory = InventoryHolderComponent.get(trader)
+
+        traderInventory.removeItemInstanceToInventory(itemInstance)
+        heroInventory.addItemInstanceToInventory(itemInstance)
         hero.gold -= itemInstance.item.price
 
     }
@@ -398,8 +408,10 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             hero.experiencePoints += xpPoints
             val gold = monsterInstance.monster.rewardGold
             hero.gold += gold
-            for (itemInstance in monsterInstance.inventory.itemInstances) {
-                hero.inventory.addItemInstanceToInventory(itemInstance)
+            val heroInventory = InventoryHolderComponent.get(hero)
+            val monsterInventory = InventoryHolderComponent.get(monsterInstance)
+            for (itemInstance in monsterInventory.itemInstances) {
+                heroInventory.addItemInstanceToInventory(itemInstance)
             }
             getMonsterInstanceAtLocation()
         }
@@ -440,11 +452,11 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     }
 
     private fun onItemInstanceRemovedEvent(event: Messages.ItemInstanceRemovedEvent): Boolean {
-        val owner = event.inventory.owner
+        val owner = event.owner
         if (owner is Hero) {
             val itemInstance = event.itemInstance
 
-            gameScreen.updateHeroInventory(owner.inventory.itemInstances)
+            gameScreen.updateHeroInventory(InventoryHolderComponent.get(owner).itemInstances)
             gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
             return true
         } else if (owner is Trader){
@@ -455,12 +467,14 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     }
 
     private fun onItemInstanceAddedEvent(event: Messages.ItemInstanceAddedEvent): Boolean {
-        val owner = event.inventory.owner
+        val owner = event.owner
         if (owner is Hero) {
             val itemInstance = event.itemInstance
 
-            gameScreen.updateHeroInventory(owner.inventory.itemInstances)
-            gameScreen.updateHeroWeapons(owner.inventory.weapons)
+            val heroInventory = InventoryHolderComponent.get(owner)
+
+            gameScreen.updateHeroInventory(heroInventory.itemInstances)
+            gameScreen.updateHeroWeapons(heroInventory.weapons)
             gameScreen.updateHeroCurrentWeapon(owner.currentWeapon)
             gameScreen.raiseMessage("You received a ${itemInstance.item.name}")
             return true
@@ -469,6 +483,14 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             return true
         }
         return false
+    }
+
+    fun heroConsumeItemInstance(itemName: String?) {
+        val hero = currentHero ?: return
+        itemName ?: return
+        hero.consumeItem(itemName)
+
+
     }
 
 

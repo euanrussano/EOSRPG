@@ -4,16 +4,18 @@ import com.sophia.eosrpg.model.Entity
 import kotlin.reflect.KClass
 
 class Item(
-    val name: String,
-    val basePrice : Int
-) {
+    override val name: String,
+    val basePrice : Int,
+) : BaseItem{
 
     private val components = mutableListOf<ItemComponent> ()
-    val price: Int
+
+    override val price: Int
         get() = if (components.size > 0) (components.map { it.getPriceMultiplier() }.sum()*basePrice).toInt() else basePrice
 
     fun add(item: ItemComponent) {
         components.add(item)
+        item.parent = this
     }
 
     fun has(kClass: KClass<out ItemComponent>) : Boolean{
@@ -24,7 +26,7 @@ class Item(
         return components.first{ item -> kClass.isInstance(item) }
     }
 
-    fun performAction(actor : Entity, target : Entity){
+    override fun performAction(actor : Entity, target : Entity){
         components.forEach {
             it.performAction(actor, target)
         }

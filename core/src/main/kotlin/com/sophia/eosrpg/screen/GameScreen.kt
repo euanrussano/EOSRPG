@@ -12,9 +12,12 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
+import com.sophia.eosrpg.model.InventoryHolderComponent
 import com.sophia.eosrpg.model.LivingEntityComponent
 import com.sophia.eosrpg.model.Location
+import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.item.RecoverHealthItemComponent
 import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.trader.Trader
@@ -30,6 +33,10 @@ class GameScreen(val game: EOSRPG) : Screen {
     private lateinit var tradeWindow: TradeWindow
 
     private lateinit var weaponsTable: Table
+    private lateinit var heroWeaponsSelectBox: KSelectBox<String>
+
+    private lateinit var consumableTable: Table
+    private lateinit var heroConsumablesSelectBox: KSelectBox<String>
 
     private lateinit var gameLogTable: Table
 
@@ -47,7 +54,7 @@ class GameScreen(val game: EOSRPG) : Screen {
     private lateinit var moveWestBtn : Button
     private lateinit var moveEastBtn : Button
 
-    private lateinit var heroWeaponsSelectBox: KSelectBox<String>
+
     private lateinit var heroNameLbl: Label
     private lateinit var heroClassLbl: Label
     private lateinit var heroHPLbl: Label
@@ -210,20 +217,37 @@ class GameScreen(val game: EOSRPG) : Screen {
                     background = skin.newDrawable("white", Color.VIOLET)
                     table {
                         it.grow()
-                        this.defaults().pad(5f)
-                        weaponsTable = this
-                        isVisible = false
-                        selectBox<String> {
-                            heroWeaponsSelectBox = this
-                            onChange{
+                        table {
+                            it.grow()
+                            this.defaults().pad(5f)
+                            weaponsTable = this
+                            isVisible = false
+                            selectBox<String> {
+                                heroWeaponsSelectBox = this
+                                onChange{
 
-                                val weaponName = if (this.selected == "None") null else this.selected
-                                gamePresenter.changeHeroCurrentWeapon(weaponName)
+                                    val weaponName = if (this.selected == "None") null else this.selected
+                                    gamePresenter.changeHeroCurrentWeapon(weaponName)
+                                }
                             }
+                            textButton("Use"){
+                                onClick {
+                                    gamePresenter.attackCurrentMonster()
+                                }
+                            }
+                        }
+                    }
+                    row()
+                    table {
+                        it.grow()
+                        this.defaults().pad(5f)
+                        consumableTable = this
+                        selectBox<String> {
+                            heroConsumablesSelectBox = this
                         }
                         textButton("Use"){
                             onClick {
-                                gamePresenter.attackCurrentMonster()
+                                gamePresenter.heroConsumeItemInstance(heroConsumablesSelectBox.selected)
                             }
                         }
                     }
@@ -318,12 +342,13 @@ class GameScreen(val game: EOSRPG) : Screen {
         heroGoldLbl.txt = currentHero.gold.toString()
         heroXPLbl.txt = currentHero.experiencePoints.toString()
 
-        updateHeroInventory(currentHero.inventory.itemInstances)
+        val heroInventory = InventoryHolderComponent.get(currentHero)
+        updateHeroInventory(heroInventory.itemInstances)
         updateHeroQuests(currentHero.questStatus)
-        updateHeroWeapons(currentHero.inventory.weapons)
+        updateHeroWeapons(heroInventory.weapons)
         updateHeroCurrentWeapon(currentHero.currentWeapon)
 
-        tradeWindow.updateHeroInventory(currentHero.inventory.itemInstances)
+        tradeWindow.updateHeroInventory(heroInventory.itemInstances)
     }
 
     fun updateHeroQuests(questStatus : Map<Quest, Boolean>) {
@@ -354,9 +379,15 @@ class GameScreen(val game: EOSRPG) : Screen {
             inventoryTable.add(price.toString())
             inventoryTable.row()
         }
-        updateHeroWeapons(inventory)
+        updateHeroWeapons(inventory.filter { itemInstance -> itemInstance.item.has(DamageItemComponent::class) })
+        updateHeroConsumables(inventory.filter { itemInstance -> itemInstance.item.has(RecoverHealthItemComponent::class) })
 
         tradeWindow.updateHeroInventory(inventory)
+    }
+
+    private fun updateHeroConsumables(inventory: List<ItemInstance>) {
+        val items = inventory.filter { itemInstance -> itemInstance.item.has(RecoverHealthItemComponent::class) }.map { it.item.name }.toTypedArray()
+        heroConsumablesSelectBox.setItems("None", *items)
     }
 
     fun updateHeroWeapons(inventory: List<ItemInstance>) {
@@ -427,7 +458,8 @@ class GameScreen(val game: EOSRPG) : Screen {
     fun updateTrader(trader: Trader) {
         tradeButton.isVisible = true
         tradeWindow.updateTraderName(trader.name)
-        tradeWindow.updateTraderInventory(trader.inventory.itemInstances)
+        val traderInventory = InventoryHolderComponent.get(trader)
+        tradeWindow.updateTraderInventory(traderInventory.itemInstances)
     }
 
     fun removeTrader() {

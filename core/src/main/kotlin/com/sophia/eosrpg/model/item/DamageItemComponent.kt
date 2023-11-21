@@ -12,6 +12,7 @@ class DamageItemComponent(
     val maximumDamage : Int,
     val damagePriceMultiplier : Float = 1f
 ) : ItemComponent {
+    override var parent: Item? = null
     override fun getPriceMultiplier(): Float {
         return damagePriceMultiplier
     }

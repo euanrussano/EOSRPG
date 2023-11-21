@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.model.trader
 
+import com.sophia.eosrpg.model.InventoryHolderComponent
 import com.sophia.eosrpg.model.item.ItemFactory
 import com.sophia.eosrpg.model.item.ItemInstanceFactory
 
@@ -11,11 +12,11 @@ class TraderFactory(
 
     init {
         val susan = Trader("Susan")
-        susan.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        InventoryHolderComponent.get(susan).addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         val farmerTed = Trader("Farmer Ted")
-        farmerTed.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        InventoryHolderComponent.get(farmerTed).addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         val peteTheHerbalist = Trader("Pete the Herbalist")
-        peteTheHerbalist.inventory.addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
+        InventoryHolderComponent.get(peteTheHerbalist).addItemInstanceToInventory(itemInstanceFactory.createItemInstance("Rusty Sword"))
         traderRepository.save(susan)
         traderRepository.save(farmerTed)
         traderRepository.save(peteTheHerbalist)
