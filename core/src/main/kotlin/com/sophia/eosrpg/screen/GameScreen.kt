@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
+import com.sophia.eosrpg.model.LivingEntityComponent
 import com.sophia.eosrpg.model.Location
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.monster.MonsterInstance
@@ -313,7 +314,7 @@ class GameScreen(val game: EOSRPG) : Screen {
         heroNameLbl.txt = currentHero.name
         heroClassLbl.txt = currentHero.characterClass
         heroLevelLbl.txt = currentHero.level.toString()
-        heroHPLbl.txt = currentHero.hitPoints.toString()
+        heroHPLbl.txt = LivingEntityComponent.get(currentHero).hitPoints.toString()
         heroGoldLbl.txt = currentHero.gold.toString()
         heroXPLbl.txt = currentHero.experiencePoints.toString()
 
@@ -386,7 +387,7 @@ class GameScreen(val game: EOSRPG) : Screen {
         monsterNameLbl.txt = monsterInstance.monster.name
         val monsterTexture = Texture("monster/" + monsterInstance.monster.name + ".png")
         monsterImage.drawable = TextureRegionDrawable(monsterTexture)
-        monsterHPLbl.txt = monsterInstance.hitPoints.toString()
+        monsterHPLbl.txt = LivingEntityComponent.get(monsterInstance).hitPoints.toString()
     }
 
     fun clearMonsterInstance() {

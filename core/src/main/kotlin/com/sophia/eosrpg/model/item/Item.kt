@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.model.item
 
+import com.sophia.eosrpg.model.Entity
 import kotlin.reflect.KClass
 
 class Item(
@@ -21,5 +22,11 @@ class Item(
 
     fun get(kClass: KClass<out ItemComponent>): ItemComponent {
         return components.first{ item -> kClass.isInstance(item) }
+    }
+
+    fun performAction(actor : Entity, target : Entity){
+        components.forEach {
+            it.performAction(actor, target)
+        }
     }
 }

@@ -2,7 +2,9 @@ package com.sophia.eosrpg.model
 
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.item.Item
+import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
+import com.sophia.eosrpg.model.Entity
 
 class Hero(
     name : String,
@@ -11,7 +13,7 @@ class Hero(
     experiencePoints : Int,
     level : Int,
     gold : Int
-) : InventoryHolder {
+) : InventoryHolder, Entity() {
 
 
     var listener : HeroListener? = null
@@ -21,8 +23,8 @@ class Hero(
         fun heroLostGold(hero: Hero, amountLost : Int)
         fun updateHeroName(hero: Hero)
         fun updateHeroClass(hero: Hero)
-        fun heroLostHitPoints(hero: Hero, amountLost : Int)
-        fun heroRecoveredHitPoints(hero: Hero, amountRecovered : Int)
+//        fun heroLostHitPoints(hero: Hero, amountLost : Int)
+//        fun heroRecoveredHitPoints(hero: Hero, amountRecovered : Int)
         fun heroGainedExperiencePoints(hero: Hero, amountGained: Int)
         fun heroLostExperiencePoints(hero: Hero, amountLost: Int)
         fun heroUpgradedLevel(hero: Hero, amountGained: Int)
@@ -31,6 +33,10 @@ class Hero(
         fun heroCompletedQuest(hero: Hero, quest: Quest)
 
 
+    }
+
+    init {
+        add(LivingEntityComponent(this, 10))
     }
 
     var name : String = name
@@ -44,15 +50,15 @@ class Hero(
             listener?.updateHeroClass(this)
         }
 
-    var hitPoints : Int = hitPoints
-        set(value) {
-            val diff = value - field
-            field = value
-            if (diff > 0)
-                listener?.heroRecoveredHitPoints(this, diff)
-            else
-                listener?.heroLostHitPoints(this, diff)
-        }
+//    var hitPoints : Int = hitPoints
+//        set(value) {
+//            val diff = value - field
+//            field = value
+//            if (diff > 0)
+//                listener?.heroRecoveredHitPoints(this, diff)
+//            else
+//                listener?.heroLostHitPoints(this, diff)
+//        }
     var experiencePoints : Int = experiencePoints
         set(value) {
             val diff = value - field
@@ -117,5 +123,9 @@ class Hero(
     fun unequipWeapon() {
         println("unequipping")
         currentWeapon = null
+    }
+
+    fun useCurrentWeaponOn(monsterInstance: MonsterInstance) {
+        currentWeapon?.performAction(this, monsterInstance)
     }
 }

@@ -13,14 +13,7 @@ class Inventory(val owner : InventoryHolder) : Telegraph {
     val itemInstances : List<ItemInstance>
         get() = __itemInstances
     val weapons : List<ItemInstance>
-        get() = __itemInstances.filter { itemInstance ->
-            val item = itemInstance.item
-            if (item is Item){
-                return@filter item.has(DamageItemComponent::class)
-            }else{
-                false
-            }
-        }
+        get() = __itemInstances.filter { itemInstance -> itemInstance.item.has(DamageItemComponent::class) }
 
     fun addItemInstanceToInventory(itemInstance: ItemInstance) {
         __itemInstances.add(itemInstance)

@@ -33,7 +33,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     val traderFactory = TraderFactory(traderRepository, itemInstanceFactory)
 
     private val monsterRepository = MonsterRepository()
-    private val monsterFactory = MonsterFactory(monsterRepository)
+    private val monsterFactory = MonsterFactory(monsterRepository, itemRepository)
     private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository, itemInstanceFactory)
 
     var currentHero : Hero? = null
@@ -97,6 +97,11 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         MessageManager.getInstance().addListeners(this,
             Messages.ItemInstanceAddedEvent.code,
             Messages.ItemInstanceRemovedEvent.code,
+            Messages.EntityAttackEvent.code,
+            Messages.EntityWasFullyHealed.code,
+            Messages.EntityWasHealed.code,
+            Messages.EntityWasHitEvent.code,
+            Messages.EntityWasKilledEvent.code
             )
     }
 
@@ -208,46 +213,51 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             gameScreen.raiseMessage("You must select a weapon to attack.")
             return
         }
-        val heroWeapon = hero.currentWeapon ?: return
-
-        val damageItemComponent = (heroWeapon.item as Item).get(DamageItemComponent::class) as DamageItemComponent
-        val damageToMonster = MathUtils.random(damageItemComponent.minimumDamage, damageItemComponent.maximumDamage)
-        if (damageToMonster == 0){
-            gameScreen.raiseMessage("You missed the ${monsterInstance.monster.name}")
-        } else {
-            monsterInstance.hitPoints -= damageToMonster
-            gameScreen.raiseMessage("You hit the ${monsterInstance.monster.name} for ${damageToMonster} points.")
+        hero.useCurrentWeaponOn(monsterInstance)
+        if (!LivingEntityComponent.get(monsterInstance).isDead){
+            monsterInstance.useCurrentWeaponOn(hero)
+//            val damageToHero = MathUtils.random(monsterInstance.monster.minimumDamage, monsterInstance.monster.maximumDamage)
+//            if (damageToHero == 0){
+//                gameScreen.raiseMessage("Monster attacks, but misses you.")
+//            } else {
+//                LivingEntityComponent.get(hero).takeDamage(damageToHero)
+//
+//            }
         }
+//        val heroWeapon = hero.currentWeapon ?: return
+//        heroWeapon.performAction(hero, )
+//        val damageItemComponent = (heroWeapon.item as Item).get(DamageItemComponent::class) as DamageItemComponent
+//        val damageToMonster = MathUtils.random(damageItemComponent.minimumDamage, damageItemComponent.maximumDamage)
+//        if (damageToMonster == 0){
+//            gameScreen.raiseMessage("You missed the ${monsterInstance.monster.name}")
+//        } else {
+//            monsterInstance.hitPoints -= damageToMonster
+//            gameScreen.raiseMessage("You hit the ${monsterInstance.monster.name} for ${damageToMonster} points.")
+//        }
 
-        if (monsterInstance.hitPoints <= 0){
-            gameScreen.raiseMessage("")
-            gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
-            val xpPoints = monsterInstance.monster.rewardExperiencePoints
-            hero.experiencePoints += xpPoints
-            val gold = monsterInstance.monster.rewardGold
-            hero.gold += gold
-            for (itemInstance in monsterInstance.inventory.itemInstances) {
-                hero.inventory.addItemInstanceToInventory(itemInstance)
-            }
-            getMonsterInstanceAtLocation()
-        }
-        else {
-            val damageToHero = MathUtils.random(monsterInstance.monster.minimumDamage, monsterInstance.monster.maximumDamage)
-            if (damageToHero == 0){
-                gameScreen.raiseMessage("Monster attacks, but misses you.")
-            } else {
-                hero.hitPoints -= damageToHero
+//        if (monsterInstance.hitPoints <= 0){
+//            gameScreen.raiseMessage("")
+//            gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
+//            val xpPoints = monsterInstance.monster.rewardExperiencePoints
+//            hero.experiencePoints += xpPoints
+//            val gold = monsterInstance.monster.rewardGold
+//            hero.gold += gold
+//            for (itemInstance in monsterInstance.inventory.itemInstances) {
+//                hero.inventory.addItemInstanceToInventory(itemInstance)
+//            }
+//            getMonsterInstanceAtLocation()
+//        }
+//        else {
+//
+//        }
 
-            }
-        }
-
-        if (hero.hitPoints <= 0){
-            gameScreen.raiseMessage("")
-            gameScreen.raiseMessage("You fainted!")
-            currentLocation = currentWorld.locationAt(0, -1)!!
-            hero.hitPoints = hero.level*10
-
-        }
+//        if (hero.hitPoints <= 0){
+//            gameScreen.raiseMessage("")
+//            gameScreen.raiseMessage("You fainted!")
+//            currentLocation = currentWorld.locationAt(0, -1)!!
+//            hero.hitPoints = hero.level*10
+//
+//        }
 
     }
 
@@ -302,10 +312,10 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             TODO("Not yet implemented")
         }
 
-        override fun heroRecoveredHitPoints(hero: Hero, amountRecovered: Int) {
-            gameScreen.updateHeroHitPoints(hero.hitPoints)
-            gameScreen.raiseMessage("You recovered ${amountRecovered} hit points.")
-        }
+//        override fun heroRecoveredHitPoints(hero: Hero, amountRecovered: Int) {
+//            gameScreen.updateHeroHitPoints(hero.hitPoints)
+//            gameScreen.raiseMessage("You recovered ${amountRecovered} hit points.")
+//        }
 
         override fun heroGainedExperiencePoints(hero: Hero, amountGained: Int) {
             gameScreen.updateHeroXP(hero.experiencePoints)
@@ -344,10 +354,10 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             gameScreen.raiseMessage("You have completed the ${quest.name} quest")
         }
 
-        override fun heroLostHitPoints(hero: Hero, amountLost: Int) {
-            gameScreen.updateHeroHitPoints(hero.hitPoints)
-            gameScreen.raiseMessage("You were hit for ${amountLost} hit points.")
-        }
+//        override fun heroLostHitPoints(hero: Hero, amountLost: Int) {
+//            gameScreen.updateHeroHitPoints(hero.hitPoints)
+//            gameScreen.raiseMessage("You were hit for ${amountLost} hit points.")
+//        }
 
     }
 
@@ -363,7 +373,69 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         when(msg.message){
             Messages.ItemInstanceAddedEvent.code -> return onItemInstanceAddedEvent(msg.extraInfo as Messages.ItemInstanceAddedEvent)
             Messages.ItemInstanceRemovedEvent.code -> return onItemInstanceRemovedEvent(msg.extraInfo as Messages.ItemInstanceRemovedEvent)
+            Messages.EntityAttackEvent.code -> return onEntityAttackedEvent(msg.extraInfo as Messages.EntityAttackEvent)
+            Messages.EntityWasFullyHealed.code -> return onEntityWasFullyHealed(msg.extraInfo as Messages.EntityWasFullyHealed)
+            Messages.EntityWasHealed.code -> return onEntityWasHealed(msg.extraInfo as Messages.EntityWasHealed)
+            Messages.EntityWasHitEvent.code -> return onEntityWasHit(msg.extraInfo as Messages.EntityWasHitEvent)
+            Messages.EntityWasKilledEvent.code -> return onEntityWasKilledEvent(msg.extraInfo as Messages.EntityWasKilledEvent)
         }
+        return false
+    }
+
+    private fun onEntityWasKilledEvent(event: Messages.EntityWasKilledEvent): Boolean {
+        if (event.owner == currentHero){
+            gameScreen.raiseMessage("")
+            gameScreen.raiseMessage("You fainted!")
+            currentLocation = currentWorld.locationAt(0, -1)!!
+            LivingEntityComponent.get(event.owner).fullyHeal()
+            return true
+        } else if (event.owner is MonsterInstance){
+            val monsterInstance = event.owner
+            val hero = currentHero!!
+            gameScreen.raiseMessage("")
+            gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
+            val xpPoints = monsterInstance.monster.rewardExperiencePoints
+            hero.experiencePoints += xpPoints
+            val gold = monsterInstance.monster.rewardGold
+            hero.gold += gold
+            for (itemInstance in monsterInstance.inventory.itemInstances) {
+                hero.inventory.addItemInstanceToInventory(itemInstance)
+            }
+            getMonsterInstanceAtLocation()
+        }
+        return false
+    }
+
+    private fun onEntityWasHit(event: Messages.EntityWasHitEvent): Boolean {
+        if (event.owner == currentHero){
+            gameScreen.updateHeroHitPoints(LivingEntityComponent.get(event.owner).hitPoints)
+            gameScreen.raiseMessage("You were hit for ${event.damage} hit points.")
+            return true
+        } else if (event.owner == currentMonsterInstance){
+            val monsterInstance = event.owner as MonsterInstance
+            gameScreen.updateMonsterInstance(monsterInstance)
+            gameScreen.raiseMessage("You hit the ${monsterInstance.monster.name} for ${event.damage} hit points.")
+            return true
+        }
+        return false
+    }
+
+    private fun onEntityWasHealed(event: Messages.EntityWasHealed): Boolean {
+        if (event.owner == currentHero){
+            gameScreen.updateHeroHitPoints(LivingEntityComponent.get(event.owner).hitPoints)
+            gameScreen.raiseMessage("You recovered ${event.amount} hit points.")
+            return true
+        }
+        return false
+    }
+
+    private fun onEntityWasFullyHealed(event: Messages.EntityWasFullyHealed): Boolean {
+        //TODO("Not yet implemented")
+        return false
+    }
+
+    private fun onEntityAttackedEvent(event: Messages.EntityAttackEvent): Boolean {
+        //TODO("Not yet implemented")
         return false
     }
 
