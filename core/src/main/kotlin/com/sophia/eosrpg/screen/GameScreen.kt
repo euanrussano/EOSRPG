@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.kotcrab.vis.ui.widget.tabbedpane.Tab
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
 import com.sophia.eosrpg.model.InventoryHolderComponent
@@ -29,6 +30,8 @@ import ktx.actors.txt
 import ktx.scene2d.*
 
 class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
+
+    private lateinit var containerTable : Table
 
     private lateinit var recipesTable : Table
 
@@ -93,7 +96,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
             this.top().left()
             this.defaults().pad(2f)
         }
-        val containerTable = scene2d.table {
+        containerTable = scene2d.table {
         }
 
         uiStage.actors {
@@ -206,20 +209,17 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
                     this.defaults().pad(10f)
                     textButton("Inventory"){
                         onClick {
-                            containerTable.clearChildren()
-                            containerTable.add(inventoryTable).grow()
+                            showTableOnContainer(containerTable, inventoryTable)
                         }
                     }
                     textButton("Quests"){
                         onClick {
-                            containerTable.clearChildren()
-                            containerTable.add(questsTable).grow()
+                            showTableOnContainer(containerTable, questsTable)
                         }
                     }
                     textButton("Recipes"){
                         onClick {
-                            containerTable.clearChildren()
-                            containerTable.add(recipesTable).grow()
+                            showTableOnContainer(containerTable, recipesTable)
                         }
                     }
                     row()
@@ -327,6 +327,11 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
         gamePresenter.initialize()
     }
 
+    private fun showTableOnContainer(container: Table, table : Table) {
+        container.clearChildren()
+        container.add(table).grow()
+    }
+
 
     override fun render(delta: Float) {
         ScreenUtils.clear(Color.BLACK)
@@ -363,6 +368,14 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
             Input.Keys.S -> gamePresenter.moveHeroSouth()
             Input.Keys.D -> gamePresenter.moveHeroEast()
             Input.Keys.Z -> gamePresenter.attackCurrentMonster()
+
+            Input.Keys.I -> showTableOnContainer(containerTable, inventoryTable)
+            Input.Keys.Q -> showTableOnContainer(containerTable, questsTable)
+            Input.Keys.R -> showTableOnContainer(containerTable, recipesTable)
+
+            Input.Keys.T -> uiStage.addActor(tradeWindow)
+
+
         }
         return false
     }
