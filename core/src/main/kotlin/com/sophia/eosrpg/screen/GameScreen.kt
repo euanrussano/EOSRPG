@@ -1,8 +1,6 @@
 package com.sophia.eosrpg.screen
 
-import com.badlogic.gdx.Application
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
+import com.badlogic.gdx.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -30,7 +28,7 @@ import ktx.actors.onClick
 import ktx.actors.txt
 import ktx.scene2d.*
 
-class GameScreen(val game: EOSRPG) : Screen {
+class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
 
     private lateinit var recipesTable : Table
 
@@ -321,7 +319,10 @@ class GameScreen(val game: EOSRPG) : Screen {
         tradeWindow = TradeWindow(gamePresenter)
 
 
-        Gdx.input.inputProcessor = uiStage
+        val im = InputMultiplexer()
+        im.addProcessor(uiStage)
+        im.addProcessor(this)
+        Gdx.input.inputProcessor = im
 
         gamePresenter.initialize()
     }
@@ -353,6 +354,17 @@ class GameScreen(val game: EOSRPG) : Screen {
 
     override fun dispose() {
         TODO("Not yet implemented")
+    }
+
+    override fun keyDown(keycode: Int): Boolean {
+        when(keycode){
+            Input.Keys.W -> gamePresenter.moveHeroNorth()
+            Input.Keys.A -> gamePresenter.moveHeroWest()
+            Input.Keys.S -> gamePresenter.moveHeroSouth()
+            Input.Keys.D -> gamePresenter.moveHeroEast()
+            Input.Keys.Z -> gamePresenter.attackCurrentMonster()
+        }
+        return false
     }
 
     fun updateHero(currentHero: Hero) {
