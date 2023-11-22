@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.screen
 
+import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
@@ -9,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
@@ -20,6 +22,7 @@ import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.item.RecoverHealthItemComponent
 import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
+import com.sophia.eosrpg.model.recipe.Recipe
 import com.sophia.eosrpg.model.trader.Trader
 import com.sophia.eosrpg.presenter.GamePresenter
 import ktx.actors.onChange
@@ -28,6 +31,8 @@ import ktx.actors.txt
 import ktx.scene2d.*
 
 class GameScreen(val game: EOSRPG) : Screen {
+
+    private lateinit var recipesTable : Table
 
     private lateinit var tradeButton : Button
     private lateinit var tradeWindow: TradeWindow
@@ -65,10 +70,15 @@ class GameScreen(val game: EOSRPG) : Screen {
     private lateinit var inventoryTable : Table
     private lateinit var questsTable : Table
 
-    private val uiStage = Stage(ScreenViewport())
+    private val uiStage = Stage(ExtendViewport(400f, 400f))
     private lateinit var gamePresenter : GamePresenter
 
     override fun show() {
+        if(Gdx.app.type == Application.ApplicationType.Android){
+            uiStage.viewport = ExtendViewport(400f, 400f)
+        } else{
+            uiStage.viewport = ScreenViewport()
+        }
 
         inventoryTable = scene2d.table {
             background = skin.getDrawable("white")
@@ -76,6 +86,11 @@ class GameScreen(val game: EOSRPG) : Screen {
             this.defaults().pad(2f)
         }
         questsTable = scene2d.table {
+            background = skin.getDrawable("white")
+            this.top().left()
+            this.defaults().pad(2f)
+        }
+        recipesTable = scene2d.table {
             background = skin.getDrawable("white")
             this.top().left()
             this.defaults().pad(2f)
@@ -203,9 +218,15 @@ class GameScreen(val game: EOSRPG) : Screen {
                             containerTable.add(questsTable).grow()
                         }
                     }
+                    textButton("Recipes"){
+                        onClick {
+                            containerTable.clearChildren()
+                            containerTable.add(recipesTable).grow()
+                        }
+                    }
                     row()
                     scrollPane {
-                        it.grow().colspan(2)
+                        it.grow().colspan(3)
                         actor = containerTable
                     }
 
@@ -347,6 +368,7 @@ class GameScreen(val game: EOSRPG) : Screen {
         updateHeroQuests(currentHero.questStatus)
         updateHeroWeapons(heroInventory.weapons)
         updateHeroCurrentWeapon(currentHero.currentWeapon)
+        updateHeroRecipes(currentHero.recipes)
 
         tradeWindow.updateHeroInventory(heroInventory.itemInstances)
     }
@@ -465,6 +487,21 @@ class GameScreen(val game: EOSRPG) : Screen {
     fun removeTrader() {
         tradeButton.isVisible = false
         tradeWindow.updateTraderInventory(listOf())
+    }
+
+    fun updateHeroRecipes(recipes: MutableList<Recipe>) {
+        recipesTable.clearChildren()
+        recipesTable.add("Name").growX()
+        recipesTable.row()
+        for (recipe in recipes) {
+            recipesTable.add(recipe.name).growX()
+            recipesTable.add(scene2d.textButton("Craft"){
+                onClick {
+                    gamePresenter.craftItem(recipe)
+                }
+            })
+            recipesTable.row()
+        }
     }
 
 

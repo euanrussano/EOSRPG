@@ -3,6 +3,7 @@ package com.sophia.eosrpg.model
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
 import com.sophia.eosrpg.model.item.DamageItemComponent
+import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
 
 class InventoryHolderComponent(val owner: Entity) : EntityComponent {
@@ -38,6 +39,13 @@ class InventoryHolderComponent(val owner: Entity) : EntityComponent {
 
     fun findByName(itemName: String): ItemInstance {
         return __itemInstances.first { itemInstance -> itemInstance.item.name == itemName }
+    }
+
+    fun removeItems(ingredients: Map<Item, Int>) {
+        for ((item, qty) in ingredients) {
+            val filter = __itemInstances.filter { it.item == item }.subList(0, qty)
+            filter.forEach { removeItemInstanceToInventory(it) }
+        }
     }
 
     companion object {

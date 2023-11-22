@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.presenter
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
 import com.badlogic.gdx.ai.msg.Telegraph
@@ -13,6 +14,10 @@ import com.sophia.eosrpg.model.monster.MonsterRepository
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.quest.QuestFactory
 import com.sophia.eosrpg.model.quest.QuestRepository
+import com.sophia.eosrpg.model.recipe.Recipe
+import com.sophia.eosrpg.model.recipe.RecipeFactory
+import com.sophia.eosrpg.model.recipe.RecipeRepository
+import com.sophia.eosrpg.model.recipe.RecipeService
 import com.sophia.eosrpg.model.trader.Trader
 import com.sophia.eosrpg.model.trader.TraderFactory
 import com.sophia.eosrpg.model.trader.TraderRepository
@@ -25,6 +30,10 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     val itemRepository = ItemRepository()
     val itemFactory = ItemFactory(itemRepository)
     val itemInstanceFactory = ItemInstanceFactory(itemRepository)
+
+    val recipeRepository = RecipeRepository()
+    val recipeFactory = RecipeFactory(recipeRepository, itemRepository)
+    val recipeService = RecipeService(recipeRepository, itemInstanceFactory)
 
     val questRepository = QuestRepository()
     val questFactory = QuestFactory(questRepository, itemRepository)
@@ -101,7 +110,8 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             Messages.EntityWasFullyHealed.code,
             Messages.EntityWasHealed.code,
             Messages.EntityWasHitEvent.code,
-            Messages.EntityWasKilledEvent.code
+            Messages.EntityWasKilledEvent.code,
+            Messages.HeroLearntRecipeEvent.code
             )
     }
 
@@ -122,6 +132,17 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             inventory.addItemInstanceToInventory(
                 itemInstanceFactory.createItemInstance("Granola Bar"),
             )
+            inventory.addItemInstanceToInventory(
+                itemInstanceFactory.createItemInstance("Oats"),
+            )
+            inventory.addItemInstanceToInventory(
+                itemInstanceFactory.createItemInstance("Honey"),
+            )
+            inventory.addItemInstanceToInventory(
+                itemInstanceFactory.createItemInstance("Raisins"),
+            )
+
+            learnRecipe(recipeRepository.findByName("Granola Bar"))
         }
         gameScreen.updateHero(currentHero!!)
         gameScreen.updateLocation(currentLocation)
@@ -388,8 +409,17 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             Messages.EntityWasHealed.code -> return onEntityWasHealed(msg.extraInfo as Messages.EntityWasHealed)
             Messages.EntityWasHitEvent.code -> return onEntityWasHit(msg.extraInfo as Messages.EntityWasHitEvent)
             Messages.EntityWasKilledEvent.code -> return onEntityWasKilledEvent(msg.extraInfo as Messages.EntityWasKilledEvent)
+            Messages.HeroLearntRecipeEvent.code -> return onHeroLearntRecipe(msg.extraInfo as Messages.HeroLearntRecipeEvent)
+            else -> Gdx.app.error(this::class.simpleName, "No call for event ${msg.extraInfo}")
         }
         return false
+    }
+
+    private fun onHeroLearntRecipe(event: Messages.HeroLearntRecipeEvent): Boolean {
+        val hero = event.hero
+        if (hero != currentHero) return false
+        gameScreen.updateHeroRecipes(hero.recipes)
+        return true
     }
 
     private fun onEntityWasKilledEvent(event: Messages.EntityWasKilledEvent): Boolean {
@@ -490,6 +520,22 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         itemName ?: return
         hero.consumeItem(itemName)
 
+
+    }
+
+    fun craftItem(recipe: Recipe) {
+        val hero = currentHero ?: return
+        if(recipeService.craftItem(hero, recipe)){
+            for ((item, qty) in recipe.outputItems) {
+                gameScreen.raiseMessage("You crafted $qty ${item.name}.")
+            }
+
+        }else {
+            gameScreen.raiseMessage("You do not have the required ingredients:")
+            for ((item, qty) in recipe.ingredients) {
+                gameScreen.raiseMessage("$qty ${item.name}.")
+            }
+        }
 
     }
 

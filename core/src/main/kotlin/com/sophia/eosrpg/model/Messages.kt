@@ -1,6 +1,7 @@
 package com.sophia.eosrpg.model
 
 import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.recipe.Recipe
 
 object Messages {
     var value = 0
@@ -58,6 +59,10 @@ object Messages {
         }
     }
     //------------ ENTITY EVENT END ------------------
-
+    class HeroLearntRecipeEvent(val hero: Hero, val recipe: Recipe) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
 
 }

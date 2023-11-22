@@ -1,10 +1,12 @@
 package com.sophia.eosrpg.model
 
+import com.badlogic.gdx.ai.msg.MessageManager
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.Entity
+import com.sophia.eosrpg.model.recipe.Recipe
 
 class Hero(
     name : String,
@@ -137,5 +139,16 @@ class Hero(
         val itemInstance = inventory.itemInstances.firstOrNull { itemInstance -> itemInstance.item.name == itemName } ?: return
         itemInstance.performAction(this, this)
         inventory.removeItemInstanceToInventory(itemInstance)
+    }
+
+    private val __recipes = mutableListOf<Recipe>()
+    val recipes;get() = __recipes
+    fun learnRecipe(recipe: Recipe){
+        if (recipe !in __recipes){
+            __recipes.add(recipe)
+            val event = Messages.HeroLearntRecipeEvent(this, recipe)
+            val code = Messages.HeroLearntRecipeEvent.code
+            MessageManager.getInstance().dispatchMessage(code, event)
+        }
     }
 }

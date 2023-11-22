@@ -17,7 +17,10 @@ class ItemFactory (
             Item("Spider Bite", 0).apply { add(DamageItemComponent(1,4)) },
             Item("Spider Fang", 1),
             Item("Spider Silk", 2),
-            Item("Granola Bar", 1).apply { add(RecoverHealthItemComponent(2)) }
+            Item("Granola Bar", 1).apply { add(RecoverHealthItemComponent(2)) },
+            Item("Oats", 1),
+            Item("Honey", 2),
+            Item("Raisins", 2),
         )
 
         itemRepository.saveAll(items)
