@@ -13,6 +13,10 @@ class MonsterInstance(
         weapon.performAction(this, entity)
     }
 
+    override fun toString(): String {
+        return monster.name
+    }
+
 //    init {
 //        add(LivingEntityComponent(this, monster.maximumHitPoints))
 //        add(InventoryHolderComponent(this))

@@ -15,6 +15,8 @@ import com.sophia.eosrpg.model.monster.*
 import com.sophia.eosrpg.model.quest.QuestRepository
 import com.sophia.eosrpg.model.quest.XMLQuestFactory
 import com.sophia.eosrpg.model.recipe.*
+import com.sophia.eosrpg.model.skill.SkillRepository
+import com.sophia.eosrpg.model.skill.XMLSkillFactory
 import com.sophia.eosrpg.model.trader.Trader
 import com.sophia.eosrpg.model.trader.TraderRepository
 import com.sophia.eosrpg.model.trader.XMLTraderFactory
@@ -22,11 +24,12 @@ import com.sophia.eosrpg.screen.GameScreen
 
 class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderListener,
 
-//    val heroListener = HeroListenerPresenter(gameScreen)
+    val skillRepository = SkillRepository()
+    val skillFactory = XMLSkillFactory(skillRepository)
 
     val itemRepository = ItemRepository()
     //val itemFactory = ItemFactory(itemRepository)
-    val itemFactory : ItemFactory = XMLItemFactory(itemRepository)
+    val itemFactory : ItemFactory = XMLItemFactory(itemRepository, skillRepository)
     val itemInstanceFactory = ItemInstanceFactory(itemRepository)
 
     val recipeRepository = RecipeRepository()
@@ -40,60 +43,61 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     val traderFactory = XMLTraderFactory(traderRepository, itemInstanceFactory)
 
     private val monsterRepository = MonsterRepository()
-    private val monsterFactory = XMLMonsterFactory(monsterRepository, itemRepository)
+    private val monsterFactory = XMLMonsterFactory(monsterRepository, itemRepository, skillRepository)
     private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository, itemInstanceFactory)
 
     val locationRepository = LocationRepository()
     val locationFactory = XMLLocationFactory(locationRepository, questRepository, traderRepository)
 
+    val gameState = GameState(locationRepository, monsterInstanceFactory)
 
-    var currentHero : Hero? = null
-        set(value) {
-            field = value
-            value?.let { gameScreen.updateHero(it) }
-        }
-
-    var currentLocation = locationRepository.locationAt(0, 0)!!
-        set(value) {
-            field = value
-            gameScreen.updateLocation(currentLocation)
-            completeQuestsAtLocation()
-            giveHeroQuestsAtLocation()
-            getMonsterInstanceAtLocation();
-            currentTrader = field.traderHere
-        }
+//    var currentHero : Hero? = null
+//        set(value) {
+//            field = value
+//            value?.let { gameScreen.updateHero(it) }
+//        }
+//
+//    var currentLocation = locationRepository.locationAt(0, 0)!!
+//        set(value) {
+//            field = value
+//            gameScreen.updateLocation(currentLocation)
+//            completeQuestsAtLocation()
+//            giveHeroQuestsAtLocation()
+//            getMonsterInstanceAtLocation();
+//            currentTrader = field.traderHere
+//        }
 
 
     val hasLocationNorth : Boolean
-        get() = locationRepository.locationAt(currentLocation.x, currentLocation.y + 1) != null
+        get() = locationRepository.locationAt(gameState.currentLocation!!.x, gameState.currentLocation!!.y + 1) != null
     val hasLocationSouth : Boolean
-        get() = locationRepository.locationAt(currentLocation.x, currentLocation.y - 1) != null
+        get() = locationRepository.locationAt(gameState.currentLocation!!.x, gameState.currentLocation!!.y - 1) != null
     val hasLocationWest : Boolean
-        get() = locationRepository.locationAt(currentLocation.x-1, currentLocation.y) != null
+        get() = locationRepository.locationAt(gameState.currentLocation!!.x-1, gameState.currentLocation!!.y) != null
     val hasLocationEast : Boolean
-        get() = locationRepository.locationAt(currentLocation.x+1, currentLocation.y) != null
+        get() = locationRepository.locationAt(gameState.currentLocation!!.x+1, gameState.currentLocation!!.y) != null
 
-    var currentMonsterInstance : MonsterInstance? = null
-        set(value) {
-            field = value
-            field?.let {
-                gameScreen.updateMonsterInstance(it)
-                gameScreen.raiseMessage("");
-                gameScreen.raiseMessage("You see a ${it.monster.name} here!");
-            }
-            if (field == null){
-                gameScreen.clearMonsterInstance()
-            }
-        }
-
-    var currentTrader : Trader? = null
-        set(value) {
-            field = value
-            if (field != null)
-                gameScreen.updateTrader(field!!)
-            else
-                gameScreen.removeTrader()
-        }
+//    var currentMonsterInstance : MonsterInstance? = null
+//        set(value) {
+//            field = value
+//            field?.let {
+//                gameScreen.updateMonsterInstance(it)
+//                gameScreen.raiseMessage("");
+//                gameScreen.raiseMessage("You see a ${it.monster.name} here!");
+//            }
+//            if (field == null){
+//                gameScreen.clearMonsterInstance()
+//            }
+//        }
+//
+//    var currentTrader : Trader? = null
+//        set(value) {
+//            field = value
+//            if (field != null)
+//                gameScreen.updateTrader(field!!)
+//            else
+//                gameScreen.removeTrader()
+//        }
 
     init {
         MessageManager.getInstance().addListeners(this,
@@ -109,13 +113,18 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             Messages.HeroSpentGoldEvent.code,
             Messages.HeroCompletedQuestEvent.code,
             Messages.HeroReceivedQuestEvent.code,
-            Messages.HeroGainedXP.code
+            Messages.HeroGainedXP.code,
+            Messages.MissedAttackEvent.code,
+            Messages.CurrentHeroChangedEvent.code,
+            Messages.CurrentLocationChangedEvent.code,
+            Messages.CurrentMonsterInstanceChangedEvent.code,
+            Messages.CurrentTraderChangedEvent.code,
             )
     }
 
 
     fun initialize() {
-        currentHero = Hero(
+        gameState.currentHero = Hero(
         "Scott",
         "Fighter",
         10,
@@ -142,81 +151,86 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
 
             learnRecipe(recipeRepository.findByName("Granola Bar"))
         }
-        gameScreen.updateHero(currentHero!!)
-        gameScreen.updateLocation(currentLocation)
+        gameScreen.updateHero(gameState.currentHero!!)
+        gameScreen.updateLocation(gameState.currentLocation!!)
     }
 
-    private fun completeQuestsAtLocation() {
-        val hero = currentHero ?: return
-        for (quest in currentLocation.questsAvailableHere) {
-            if (hero.hasQuestNotCompleted(quest)){
-                if (quest.task.canPerform(hero)){
-                    quest.task.perform(hero)
-                    quest.reward.giveTo(hero)
+//    private fun completeQuestsAtLocation() {
+//        val hero = gameState.currentHero ?: return
+//
+//        for (quest in currentLocation.questsAvailableHere) {
+//            if (hero.hasQuestNotCompleted(quest)){
+//                if (quest.task.canPerform(hero)){
+//                    quest.task.perform(hero)
+//                    quest.reward.giveTo(hero)
+//
+//                    hero.markQuestAsComplete(quest)
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun giveHeroQuestsAtLocation() {
+//        val hero = currentHero?: return
+//        for (quest in currentLocation.questsAvailableHere){
+//            hero.assignQuest(quest)
+//        }
+//    }
 
-                    hero.markQuestAsComplete(quest)
-                }
-            }
-        }
-    }
-
-    private fun giveHeroQuestsAtLocation() {
-        val hero = currentHero?: return
-        for (quest in currentLocation.questsAvailableHere){
-            hero.assignQuest(quest)
-        }
-    }
-
-    private fun getMonsterInstanceAtLocation() {
-        if (currentLocation.monsterProbability.isEmpty()) {
-            currentMonsterInstance = null
-            return
-        }
-        val totalChance = currentLocation.monsterProbability.values.sum()
-        val randomNumber = MathUtils.random(1, totalChance)
-
-        var runningTotal = 0
-        for ((monsterName, prob) in currentLocation.monsterProbability) {
-            runningTotal += prob
-            if (randomNumber <= runningTotal){
-                currentMonsterInstance = monsterInstanceFactory.createMonsterInstance(monsterName)
-                return
-
-            }
-        }
-
-        currentMonsterInstance = monsterInstanceFactory.createMonsterInstance(currentLocation.monsterProbability.keys.last())
-
-    }
+//    private fun getMonsterInstanceAtLocation() {
+//        if (currentLocation.monsterProbability.isEmpty()) {
+//            currentMonsterInstance = null
+//            return
+//        }
+//        val totalChance = currentLocation.monsterProbability.values.sum()
+//        val randomNumber = MathUtils.random(1, totalChance)
+//
+//        var runningTotal = 0
+//        for ((monsterName, prob) in currentLocation.monsterProbability) {
+//            runningTotal += prob
+//            if (randomNumber <= runningTotal){
+//                currentMonsterInstance = monsterInstanceFactory.createMonsterInstance(monsterName)
+//                return
+//
+//            }
+//        }
+//
+//        currentMonsterInstance = monsterInstanceFactory.createMonsterInstance(currentLocation.monsterProbability.keys.last())
+//
+//    }
 
     fun moveHeroNorth() {
-        locationRepository.locationAt(currentLocation.x, currentLocation.y+1)?.let {
-            currentLocation = it
-        }
+        gameState.moveHeroNorth()
+//        locationRepository.locationAt(currentLocation.x, currentLocation.y+1)?.let {
+//            currentLocation = it
+//        }
     }
 
     fun moveHeroSouth() {
-        locationRepository.locationAt(currentLocation.x, currentLocation.y-1)?.let {
-            currentLocation = it
-        }
+        gameState.moveHeroSouth()
+//        locationRepository.locationAt(currentLocation.x, currentLocation.y-1)?.let {
+//            currentLocation = it
+//        }
 
     }
 
     fun moveHeroWest() {
-        locationRepository.locationAt(currentLocation.x-1, currentLocation.y)?.let {
-            currentLocation = it
-        }
+        gameState.moveHeroWest()
+//        locationRepository.locationAt(currentLocation.x-1, currentLocation.y)?.let {
+//            currentLocation = it
+//        }
 
     }
 
     fun moveHeroEast() {
-        locationRepository.locationAt(currentLocation.x+1, currentLocation.y)?.let {
-            currentLocation = it
-        }
+        gameState.moveHeroEast()
+//        locationRepository.locationAt(currentLocation.x+1, currentLocation.y)?.let {
+//            currentLocation = it
+//        }
     }
 
     fun changeHeroCurrentWeapon(weaponName: String?) {
-        val hero = currentHero?: return
+        val hero = gameState.currentHero?: return
         if (weaponName != null){
             val weapon = itemRepository.findByName(weaponName)
             hero.equipWeapon(weapon)
@@ -226,8 +240,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     fun attackCurrentMonster() {
-        val hero = currentHero ?: return
-        val monsterInstance = currentMonsterInstance?: return
+        val hero = gameState.currentHero ?: return
+        val monsterInstance = gameState.currentMonsterInstance?: return
         if (hero.currentWeapon == null){
             gameScreen.raiseMessage("You must select a weapon to attack.")
             return
@@ -240,8 +254,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     fun heroSellItemInstance(itemInstance: ItemInstance) {
-        val hero = currentHero ?: return
-        val trader = currentTrader ?: return
+        val hero = gameState.currentHero ?: return
+        val trader = gameState.currentTrader ?: return
         val heroInventory = hero.inventory
         val traderInventory = trader.inventory
 
@@ -251,8 +265,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     fun heroBuyItemInstance(itemInstance: ItemInstance) {
-        val hero = currentHero ?: return
-        val trader = currentTrader ?: return
+        val hero = gameState.currentHero ?: return
+        val trader = gameState.currentTrader ?: return
         if (hero.gold < itemInstance.item.price) return
 
         val heroInventory = hero.inventory
@@ -279,9 +293,55 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             Messages.HeroCompletedQuestEvent.code -> return onHeroCompletedQuestEvent(msg.extraInfo as Messages.HeroCompletedQuestEvent)
             Messages.HeroReceivedQuestEvent.code -> return onHeroReceivedQuestEvent(msg.extraInfo as Messages.HeroReceivedQuestEvent)
             Messages.HeroGainedXP.code -> return onHeroGainedXP(msg.extraInfo as Messages.HeroGainedXP)
+            Messages.MissedAttackEvent.code -> return onMissedAttackEvent(msg.extraInfo as Messages.MissedAttackEvent)
+            Messages.CurrentHeroChangedEvent.code -> return onCurrentHeroChangedEvent(msg.extraInfo as Messages.CurrentHeroChangedEvent)
+            Messages.CurrentLocationChangedEvent.code -> return onCurrentLocationChangedEvent(msg.extraInfo as Messages.CurrentLocationChangedEvent)
+            Messages.CurrentMonsterInstanceChangedEvent.code -> return onCurrentMonsterInstanceChangedEvent(msg.extraInfo as Messages.CurrentMonsterInstanceChangedEvent)
+            Messages.CurrentTraderChangedEvent.code -> return onCurrentTraderChangedEvent(msg.extraInfo as Messages.CurrentTraderChangedEvent)
             else -> Gdx.app.error(this::class.simpleName, "No call for event ${msg.extraInfo}")
         }
         return false
+    }
+
+    private fun onCurrentTraderChangedEvent(event: Messages.CurrentTraderChangedEvent): Boolean {
+        val trader = event.trader
+        if (trader != null)
+            gameScreen.updateTrader(trader)
+        else
+            gameScreen.removeTrader()
+        return true
+    }
+
+    private fun onCurrentMonsterInstanceChangedEvent(event: Messages.CurrentMonsterInstanceChangedEvent): Boolean {
+
+        event.monsterInstance?.let {
+            gameScreen.updateMonsterInstance(it)
+            gameScreen.raiseMessage("");
+            gameScreen.raiseMessage("You see a ${it.monster.name} here!");
+        }
+
+        if (event.monsterInstance == null){
+            gameScreen.clearMonsterInstance()
+        }
+        return true
+    }
+
+    private fun onCurrentLocationChangedEvent(event: Messages.CurrentLocationChangedEvent) : Boolean{
+        event.location?.let { gameScreen.updateLocation(it) }
+        return true
+    }
+    private fun onCurrentHeroChangedEvent(event: Messages.CurrentHeroChangedEvent): Boolean {
+        event.hero?.let { gameScreen.updateHero(it) }
+        return true
+
+    }
+
+    private fun onMissedAttackEvent(event: Messages.MissedAttackEvent): Boolean {
+        val actor = event.actor
+        val target = event.target
+
+        gameScreen.raiseMessage("${actor} missed attack on ${target}")
+        return true
     }
 
     private fun onHeroGainedXP(event: Messages.HeroGainedXP): Boolean {
@@ -338,21 +398,21 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
 
     private fun onHeroLearntRecipe(event: Messages.HeroLearntRecipeEvent): Boolean {
         val hero = event.hero
-        if (hero != currentHero) return false
+        if (hero != gameState.currentHero) return false
         gameScreen.updateHeroRecipes(hero.recipes)
         return true
     }
 
     private fun onEntityWasKilledEvent(event: Messages.EntityWasKilledEvent): Boolean {
-        if (event.owner == currentHero){
+        if (event.owner == gameState.currentHero){
             gameScreen.raiseMessage("")
             gameScreen.raiseMessage("You fainted!")
-            currentLocation = locationRepository.locationAt(0, -1)!!
+            gameState.currentLocation = locationRepository.locationAt(0, -1)!!
             event.owner.health.fullyHeal()
             return true
         } else if (event.owner is MonsterInstance){
             val monsterInstance = event.owner
-            val hero = currentHero!!
+            val hero = gameState.currentHero!!
             gameScreen.raiseMessage("")
             gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
             val xpPoints = monsterInstance.monster.rewardExperiencePoints
@@ -364,17 +424,17 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             for (itemInstance in monsterInventory.itemInstances) {
                 heroInventory.addItemInstanceToInventory(itemInstance)
             }
-            getMonsterInstanceAtLocation()
+            gameState.getMonsterInstanceAtLocation()
         }
         return false
     }
 
     private fun onEntityWasHit(event: Messages.EntityWasHitEvent): Boolean {
-        if (event.owner == currentHero){
+        if (event.owner == gameState.currentHero){
             gameScreen.updateHeroHitPoints(event.owner.health.hitPoints)
             gameScreen.raiseMessage("You were hit for ${event.damage} hit points.")
             return true
-        } else if (event.owner == currentMonsterInstance){
+        } else if (event.owner == gameState.currentMonsterInstance){
             val monsterInstance = event.owner as MonsterInstance
             gameScreen.updateMonsterInstance(monsterInstance)
             gameScreen.raiseMessage("You hit the ${monsterInstance.monster.name} for ${event.damage} hit points.")
@@ -384,7 +444,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     private fun onEntityWasHealed(event: Messages.EntityWasHealed): Boolean {
-        if (event.owner == currentHero){
+        if (event.owner == gameState.currentHero){
             gameScreen.updateHeroHitPoints(event.owner.health.hitPoints)
             gameScreen.raiseMessage("You recovered ${event.amount} hit points.")
             return true
@@ -394,7 +454,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
 
     private fun onEntityWasFullyHealed(event: Messages.EntityWasFullyHealed): Boolean {
         val owner = event.owner
-        if (owner == currentHero){
+        if (owner == gameState.currentHero){
             gameScreen.updateHero(owner as Hero)
             gameScreen.raiseMessage("You were fully healed!")
             return true
@@ -442,7 +502,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     fun heroConsumeItemInstance(itemName: String?) {
-        val hero = currentHero ?: return
+        val hero = gameState.currentHero ?: return
         itemName ?: return
         hero.consumeItem(itemName)
 
@@ -450,7 +510,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     }
 
     fun craftItem(recipe: Recipe) {
-        val hero = currentHero ?: return
+        val hero = gameState.currentHero ?: return
         if(recipeService.craftItem(hero, recipe)){
             for ((item, qty) in recipe.outputItems) {
                 gameScreen.raiseMessage("You crafted $qty ${item.name}.")
@@ -463,6 +523,10 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             }
         }
 
+    }
+
+    fun save() {
+        SaveGameService.save(gameState)
     }
 
 

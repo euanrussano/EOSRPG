@@ -1,10 +1,12 @@
 package com.sophia.eosrpg.model.monster
 
 import com.sophia.eosrpg.model.item.ItemRepository
+import com.sophia.eosrpg.model.skill.SkillRepository
 
 class MonsterFactory(
     val monsterRepository: MonsterRepository,
-    val itemRepository: ItemRepository
+    val itemRepository: ItemRepository,
+    val skillRepository: SkillRepository
 ) {
     init {
         monsterRepository.saveAll(

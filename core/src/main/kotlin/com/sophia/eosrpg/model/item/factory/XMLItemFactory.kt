@@ -1,11 +1,14 @@
 package com.sophia.eosrpg.model.item.factory
 
 import com.badlogic.gdx.utils.XmlReader
+import com.sophia.eosrpg.model.skill.Skill
 import com.sophia.eosrpg.model.item.*
+import com.sophia.eosrpg.model.skill.SkillRepository
 import ktx.assets.toInternalFile
 
 class XMLItemFactory(
-    override val itemRepository: ItemRepository
+    override val itemRepository: ItemRepository,
+    override val skillRepository: SkillRepository
 ) : ItemFactory{
 
     val xmlReader  = XmlReader()
@@ -31,7 +34,10 @@ class XMLItemFactory(
                         "damageItemComponent" -> {
                             val minimumDamage = componentElement.getChildByName("minimumDamage").text.toInt()
                             val maximumDamage = componentElement.getChildByName("maximumDamage").text.toInt()
-                            components.add(DamageItemComponent(minimumDamage, maximumDamage))
+                            val skillToUse = componentElement.getChildByName("skill")
+                            val skillName = skillToUse.getAttribute("name")
+                            val skill = skillRepository.findByName(skillName)
+                            components.add(DamageItemComponent(minimumDamage, maximumDamage, skillToUse = skill))
                         }
                         "recoverHealthItemComponent" -> {
                             val amountToRecover = componentElement.getChildByName("amountToRecover").text.toInt()

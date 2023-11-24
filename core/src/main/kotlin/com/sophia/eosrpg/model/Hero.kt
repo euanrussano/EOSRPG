@@ -128,4 +128,8 @@ class Hero(
             MessageManager.getInstance().dispatchMessage(code, event)
         }
     }
+
+    override fun toString(): String {
+        return name
+    }
 }

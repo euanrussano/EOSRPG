@@ -21,6 +21,12 @@
             <lootItem name="Rat Tail" probability="25"/>
             <lootItem name="Rat Fur" probability="75"/>
         </lootItems>
+        <skills>
+            <skill>
+                <name>Bite</name>
+                <value>20</value>
+            </skill>
+        </skills>
     </monster>
     <monster>
         <name>Spider</name>
@@ -32,5 +38,11 @@
             <lootItem name="Spider Fang" probability="25"/>
             <lootItem name="Spider Silk" probability="75"/>
         </lootItems>
+        <skills>
+            <skill>
+                <name>Bite</name>
+                <value>10</value>
+            </skill>
+        </skills>
     </monster>
 </monsters>

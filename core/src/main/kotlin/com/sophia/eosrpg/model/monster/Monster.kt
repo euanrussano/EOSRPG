@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.model.monster
 
+import com.sophia.eosrpg.model.skill.Skill
 import com.sophia.eosrpg.model.item.Item
 
 class Monster(
@@ -8,6 +9,8 @@ class Monster(
     val rewardExperiencePoints : Int,
     val rewardGold : Int,
     val lootItems : Map<String, Int>,
-    val weapon : Item
+    val weapon : Item,
+    val baseSkills : Map<Skill,Int> = mapOf()
 ) {
+
 }

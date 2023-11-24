@@ -13,6 +13,7 @@ class MonsterInstanceFactory(
         val monster = monsterRepository.findByName(name)
 
         val monsterInstance = MonsterInstance(monster)
+        monsterInstance.skills.putAll(monster.baseSkills)
         val monsterInventory = monsterInstance.inventory
 
         var runningTotal = 0

@@ -7,6 +7,7 @@
             <damageItemComponent>
                 <minimumDamage>1</minimumDamage>
                 <maximumDamage>2</maximumDamage>
+                <skill name="Sword"/>
             </damageItemComponent>
         </components>
     </item>
@@ -17,6 +18,7 @@
             <damageItemComponent>
                 <minimumDamage>1</minimumDamage>
                 <maximumDamage>3</maximumDamage>
+                <skill name="Sword"/>
             </damageItemComponent>
         </components>
     </item>
@@ -27,6 +29,7 @@
             <damageItemComponent>
                 <minimumDamage>1</minimumDamage>
                 <maximumDamage>2</maximumDamage>
+                <skill name="Bite"/>
             </damageItemComponent>
         </components>
     </item>
@@ -45,6 +48,7 @@
             <damageItemComponent>
                 <minimumDamage>1</minimumDamage>
                 <maximumDamage>2</maximumDamage>
+                <skill name="Bite"/>
             </damageItemComponent>
         </components>
     </item>
@@ -63,6 +67,7 @@
             <damageItemComponent>
                 <minimumDamage>1</minimumDamage>
                 <maximumDamage>4</maximumDamage>
+                <skill name="Bite"/>
             </damageItemComponent>
         </components>
     </item>

@@ -343,7 +343,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
     }
 
     override fun pause() {
-        TODO("Not yet implemented")
+        gamePresenter.save()
     }
 
     override fun resume() {
@@ -351,7 +351,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
     }
 
     override fun hide() {
-        TODO("Not yet implemented")
+
     }
 
     override fun dispose() {

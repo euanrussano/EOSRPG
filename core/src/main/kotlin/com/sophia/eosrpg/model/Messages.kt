@@ -2,8 +2,11 @@ package com.sophia.eosrpg.model
 
 import com.sophia.eosrpg.model.entity.Entity
 import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.location.Location
+import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.recipe.Recipe
+import com.sophia.eosrpg.model.trader.Trader
 
 object Messages {
     var value = 0
@@ -100,6 +103,30 @@ object Messages {
     }
 
     class HeroGainedLevel(val hero: Hero) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class CurrentHeroChangedEvent(val hero: Hero?) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class CurrentLocationChangedEvent(val location: Location?) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class CurrentMonsterInstanceChangedEvent(val monsterInstance: MonsterInstance?) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class CurrentTraderChangedEvent(val trader: Trader?) {
         companion object{
             val code : Int = nextInt()
         }

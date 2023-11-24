@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<skills>
+    <skill>
+        <name>Sword</name>
+        <baseAttribute>DX</baseAttribute>
+        <modifier>-5</modifier>
+    </skill>
+    <skill>
+        <name>Bite</name>
+        <baseAttribute>DX</baseAttribute>
+        <modifier>-6</modifier>
+    </skill>
+</skills>
