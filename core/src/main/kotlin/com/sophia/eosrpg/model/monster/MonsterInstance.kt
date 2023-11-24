@@ -1,11 +1,11 @@
 package com.sophia.eosrpg.model.monster
 
-import com.sophia.eosrpg.model.*
+import com.sophia.eosrpg.model.entity.Entity
 import com.sophia.eosrpg.model.item.ItemInstance
 
 class MonsterInstance(
     val monster : Monster,
-) : Entity() {
+) : Entity(monster.maximumHitPoints) {
 
     val weapon = ItemInstance(monster.weapon)
 
@@ -13,8 +13,8 @@ class MonsterInstance(
         weapon.performAction(this, entity)
     }
 
-    init {
-        add(LivingEntityComponent(this, monster.maximumHitPoints))
-        add(InventoryHolderComponent(this))
-    }
+//    init {
+//        add(LivingEntityComponent(this, monster.maximumHitPoints))
+//        add(InventoryHolderComponent(this))
+//    }
 }

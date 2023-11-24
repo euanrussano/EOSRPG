@@ -1,20 +1,19 @@
 package com.sophia.eosrpg.model.quest
 
 import com.sophia.eosrpg.model.Hero
-import com.sophia.eosrpg.model.InventoryHolderComponent
 
 class CollectItemsQuestTask(
     val itemsToComplete : Map<String, Int>
 ) : QuestTask {
     override fun canPerform(hero: Hero): Boolean {
-        val heroInventory = InventoryHolderComponent.get(hero)
+        val heroInventory = hero.inventory
         return heroInventory.hasAllItems(itemsToComplete)
     }
 
     override fun perform(hero: Hero) {
         for ((itemName, qty) in itemsToComplete) {
             for (i in 0 until qty){
-                val heroInventory = InventoryHolderComponent.get(hero)
+                val heroInventory = hero.inventory
                 val itemInstance1 = heroInventory.findByName(itemName)
                 heroInventory.removeItemInstanceToInventory(itemInstance1)
             }

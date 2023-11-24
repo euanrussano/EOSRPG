@@ -1,5 +1,6 @@
 package com.sophia.eosrpg.model
 
+import com.sophia.eosrpg.model.entity.Entity
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.recipe.Recipe

@@ -1,8 +1,6 @@
 package com.sophia.eosrpg.model.trader
 
 import com.badlogic.gdx.utils.XmlReader
-import com.sophia.eosrpg.model.InventoryHolderComponent
-import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstanceFactory
 import ktx.assets.toInternalFile
 
@@ -31,7 +29,7 @@ class XMLTraderFactory(
             val name = traderElement.getChildByName("name").text
 
             val trader = Trader(name)
-            val inventory = InventoryHolderComponent.get(trader)
+            val inventory = trader.inventory
 
 
             val inventoryRootElement = traderElement.getChildByName("inventory")

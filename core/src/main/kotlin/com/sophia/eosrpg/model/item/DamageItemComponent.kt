@@ -2,10 +2,9 @@ package com.sophia.eosrpg.model.item
 
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.MathUtils
-import com.sophia.eosrpg.model.Entity
-import com.sophia.eosrpg.model.LivingEntityComponent
+import com.sophia.eosrpg.model.entity.Entity
+import com.sophia.eosrpg.model.entity.Health
 import com.sophia.eosrpg.model.Messages
-import kotlin.math.max
 
 class DamageItemComponent(
     val minimumDamage : Int,
@@ -29,7 +28,7 @@ class DamageItemComponent(
             val code = Messages.EntityAttackEvent.code
             MessageManager.getInstance().dispatchMessage(code, event)
 
-            val livingComponent : LivingEntityComponent = LivingEntityComponent.get(target)
+            val livingComponent : Health = target.health
             livingComponent.takeDamage(damageToTarget)
         }
 

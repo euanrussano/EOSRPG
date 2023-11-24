@@ -12,8 +12,6 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
-import com.sophia.eosrpg.model.InventoryHolderComponent
-import com.sophia.eosrpg.model.LivingEntityComponent
 import com.sophia.eosrpg.model.location.Location
 import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.ItemInstance
@@ -383,11 +381,11 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
         heroNameLbl.txt = currentHero.name
         heroClassLbl.txt = currentHero.characterClass
         heroLevelLbl.txt = currentHero.level.toString()
-        heroHPLbl.txt = LivingEntityComponent.get(currentHero).hitPoints.toString()
+        heroHPLbl.txt = currentHero.health.hitPoints.toString()
         heroGoldLbl.txt = currentHero.gold.toString()
         heroXPLbl.txt = currentHero.experiencePoints.toString()
 
-        val heroInventory = InventoryHolderComponent.get(currentHero)
+        val heroInventory = currentHero.inventory
         updateHeroInventory(heroInventory.itemInstances)
         updateHeroQuests(currentHero.questStatus)
         updateHeroWeapons(heroInventory.weapons)
@@ -473,7 +471,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
         monsterNameLbl.txt = monsterInstance.monster.name
         val monsterTexture = Texture("monster/" + monsterInstance.monster.name + ".png")
         monsterImage.drawable = TextureRegionDrawable(monsterTexture)
-        monsterHPLbl.txt = LivingEntityComponent.get(monsterInstance).hitPoints.toString()
+        monsterHPLbl.txt = monsterInstance.health.hitPoints.toString()
     }
 
     fun clearMonsterInstance() {
@@ -513,7 +511,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
     fun updateTrader(trader: Trader) {
         tradeButton.isVisible = true
         tradeWindow.updateTraderName(trader.name)
-        val traderInventory = InventoryHolderComponent.get(trader)
+        val traderInventory = trader.inventory
         tradeWindow.updateTraderInventory(traderInventory.itemInstances)
     }
 

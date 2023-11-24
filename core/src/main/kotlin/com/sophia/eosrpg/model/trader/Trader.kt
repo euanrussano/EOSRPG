@@ -1,13 +1,12 @@
 package com.sophia.eosrpg.model.trader
 
-import com.sophia.eosrpg.model.Entity
-import com.sophia.eosrpg.model.InventoryHolderComponent
+import com.sophia.eosrpg.model.entity.Entity
 
 class Trader(
     val name : String,
-) : Entity() {
+) : Entity(1) {
 
-    init {
-        add(InventoryHolderComponent(this))
-    }
+//    init {
+//        add(InventoryHolderComponent(this))
+//    }
 }

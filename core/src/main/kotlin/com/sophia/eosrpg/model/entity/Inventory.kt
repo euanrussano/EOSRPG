@@ -1,12 +1,12 @@
-package com.sophia.eosrpg.model
+package com.sophia.eosrpg.model.entity
 
 import com.badlogic.gdx.ai.msg.MessageManager
-import com.badlogic.gdx.ai.msg.Telegram
+import com.sophia.eosrpg.model.Messages
 import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.item.ItemInstance
 
-class InventoryHolderComponent(val owner: Entity) : EntityComponent {
+class Inventory(val owner: Entity) {
     private val __itemInstances = mutableListOf<ItemInstance>()
     val itemInstances : List<ItemInstance>
         get() = __itemInstances
@@ -48,10 +48,10 @@ class InventoryHolderComponent(val owner: Entity) : EntityComponent {
         }
     }
 
-    companion object {
-        fun get(target: Entity): InventoryHolderComponent {
-            return target.components.first { it is InventoryHolderComponent } as InventoryHolderComponent
-        }
-    }
+//    companion object {
+//        fun get(target: Entity): InventoryHolderComponent {
+//            return target.components.first { it is InventoryHolderComponent } as InventoryHolderComponent
+//        }
+//    }
 
 }

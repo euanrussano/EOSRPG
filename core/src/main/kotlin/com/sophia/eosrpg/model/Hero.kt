@@ -5,7 +5,7 @@ import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.item.Item
 import com.sophia.eosrpg.model.monster.MonsterInstance
 import com.sophia.eosrpg.model.quest.Quest
-import com.sophia.eosrpg.model.Entity
+import com.sophia.eosrpg.model.entity.Entity
 import com.sophia.eosrpg.model.recipe.Recipe
 
 class Hero(
@@ -15,12 +15,12 @@ class Hero(
     experiencePoints : Int,
     level : Int,
     gold : Int
-) :  Entity() {
+) :  Entity(10) {
 
-    init {
-        add(LivingEntityComponent(this, 10))
-        add(InventoryHolderComponent(this))
-    }
+//    init {
+//        add(LivingEntityComponent(this, 10))
+//        add(InventoryHolderComponent(this))
+//    }
 
     var name : String = name
         set(value) {
@@ -97,7 +97,7 @@ class Hero(
 
     fun equipWeapon(weapon: Item) {
         println("equipping")
-        val inventory = InventoryHolderComponent.get(this)
+        val inventory = this.inventory
         currentWeapon = inventory.weapons.firstOrNull { itemInstance -> itemInstance.item == weapon }
     }
 
@@ -111,7 +111,7 @@ class Hero(
     }
 
     fun consumeItem(itemName: String) {
-        val inventory = InventoryHolderComponent.get(this)
+        val inventory = this.inventory
 
         val itemInstance = inventory.itemInstances.firstOrNull { itemInstance -> itemInstance.item.name == itemName } ?: return
         itemInstance.performAction(this, this)

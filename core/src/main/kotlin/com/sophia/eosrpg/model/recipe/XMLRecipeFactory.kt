@@ -34,7 +34,7 @@ class XMLRecipeFactory(
 
             val ingredientsRoot = recipeElement.getChildByName("ingredients")
             for (idx1 in 0 until ingredientsRoot.childCount){
-                val ingredientElement = ingredientsRoot.getChildByName("item")
+                val ingredientElement = ingredientsRoot.getChild(idx1)
                 val itemName = ingredientElement.getAttribute("name")
                 val itemQty = ingredientElement.getAttribute("quantity").toInt()
 

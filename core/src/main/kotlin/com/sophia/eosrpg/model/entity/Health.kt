@@ -1,9 +1,10 @@
-package com.sophia.eosrpg.model
+package com.sophia.eosrpg.model.entity
 
 import com.badlogic.gdx.ai.msg.MessageManager
+import com.sophia.eosrpg.model.Messages
 import kotlin.math.min
 
-class LivingEntityComponent(val owner : Entity, private var maximumHitPoints : Int) : EntityComponent {
+class Health(val owner : Entity, private var maximumHitPoints : Int)  {
     private var __hitPoints = maximumHitPoints
     val hitPoints : Int
         get() = __hitPoints
@@ -39,10 +40,10 @@ class LivingEntityComponent(val owner : Entity, private var maximumHitPoints : I
         }
     }
 
-    companion object {
-        fun get(target: Entity): LivingEntityComponent {
-            return target.components.first { it is LivingEntityComponent } as LivingEntityComponent
-        }
-    }
+//    companion object {
+//        fun get(target: Entity): LivingEntityComponent {
+//            return target.components.first { it is LivingEntityComponent } as LivingEntityComponent
+//        }
+//    }
 
 }

@@ -123,7 +123,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
         1,
         10_000
          ).apply {
-             val inventory = InventoryHolderComponent.get(this)
+             val inventory = this.inventory
             inventory.addItemInstanceToInventory(
                 itemInstanceFactory.createItemInstance("Pointy Stick"),
             )
@@ -233,7 +233,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             return
         }
         hero.useCurrentWeaponOn(monsterInstance)
-        if (!LivingEntityComponent.get(monsterInstance).isDead){
+        if (!monsterInstance.health.isDead){
             monsterInstance.useCurrentWeaponOn(hero)
         }
 
@@ -242,8 +242,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
     fun heroSellItemInstance(itemInstance: ItemInstance) {
         val hero = currentHero ?: return
         val trader = currentTrader ?: return
-        val heroInventory = InventoryHolderComponent.get(hero)
-        val traderInventory = InventoryHolderComponent.get(trader)
+        val heroInventory = hero.inventory
+        val traderInventory = trader.inventory
 
         heroInventory.removeItemInstanceToInventory(itemInstance)
         traderInventory.addItemInstanceToInventory(itemInstance)
@@ -255,8 +255,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
         val trader = currentTrader ?: return
         if (hero.gold < itemInstance.item.price) return
 
-        val heroInventory = InventoryHolderComponent.get(hero)
-        val traderInventory = InventoryHolderComponent.get(trader)
+        val heroInventory = hero.inventory
+        val traderInventory = trader.inventory
 
         traderInventory.removeItemInstanceToInventory(itemInstance)
         heroInventory.addItemInstanceToInventory(itemInstance)
@@ -348,7 +348,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             gameScreen.raiseMessage("")
             gameScreen.raiseMessage("You fainted!")
             currentLocation = locationRepository.locationAt(0, -1)!!
-            LivingEntityComponent.get(event.owner).fullyHeal()
+            event.owner.health.fullyHeal()
             return true
         } else if (event.owner is MonsterInstance){
             val monsterInstance = event.owner
@@ -359,8 +359,8 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
             hero.increaseXP(xpPoints)
             val gold = monsterInstance.monster.rewardGold
             hero.receiveGold(gold)
-            val heroInventory = InventoryHolderComponent.get(hero)
-            val monsterInventory = InventoryHolderComponent.get(monsterInstance)
+            val heroInventory = hero.inventory
+            val monsterInventory = monsterInstance.inventory
             for (itemInstance in monsterInventory.itemInstances) {
                 heroInventory.addItemInstanceToInventory(itemInstance)
             }
@@ -371,7 +371,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
 
     private fun onEntityWasHit(event: Messages.EntityWasHitEvent): Boolean {
         if (event.owner == currentHero){
-            gameScreen.updateHeroHitPoints(LivingEntityComponent.get(event.owner).hitPoints)
+            gameScreen.updateHeroHitPoints(event.owner.health.hitPoints)
             gameScreen.raiseMessage("You were hit for ${event.damage} hit points.")
             return true
         } else if (event.owner == currentMonsterInstance){
@@ -385,7 +385,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
 
     private fun onEntityWasHealed(event: Messages.EntityWasHealed): Boolean {
         if (event.owner == currentHero){
-            gameScreen.updateHeroHitPoints(LivingEntityComponent.get(event.owner).hitPoints)
+            gameScreen.updateHeroHitPoints(event.owner.health.hitPoints)
             gameScreen.raiseMessage("You recovered ${event.amount} hit points.")
             return true
         }
@@ -412,7 +412,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
         if (owner is Hero) {
             val itemInstance = event.itemInstance
 
-            gameScreen.updateHeroInventory(InventoryHolderComponent.get(owner).itemInstances)
+            gameScreen.updateHeroInventory(owner.inventory.itemInstances)
             gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
             return true
         } else if (owner is Trader){
@@ -427,7 +427,7 @@ class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderLi
         if (owner is Hero) {
             val itemInstance = event.itemInstance
 
-            val heroInventory = InventoryHolderComponent.get(owner)
+            val heroInventory = owner.inventory
 
             gameScreen.updateHeroInventory(heroInventory.itemInstances)
             gameScreen.updateHeroWeapons(heroInventory.weapons)

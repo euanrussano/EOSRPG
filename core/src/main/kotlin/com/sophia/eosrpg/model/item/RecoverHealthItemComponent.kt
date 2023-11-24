@@ -1,7 +1,6 @@
 package com.sophia.eosrpg.model.item
 
-import com.sophia.eosrpg.model.Entity
-import com.sophia.eosrpg.model.LivingEntityComponent
+import com.sophia.eosrpg.model.entity.Entity
 
 class RecoverHealthItemComponent(val amountToRecover : Int) : ItemComponent {
     override var parent: Item? = null
@@ -10,6 +9,6 @@ class RecoverHealthItemComponent(val amountToRecover : Int) : ItemComponent {
     }
 
     override fun performAction(actor: Entity, target: Entity) {
-        LivingEntityComponent.get(target).heal(2)
+        target.health.heal(2)
     }
 }
