@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<locations>
+    <location>
+        <x>-2</x>
+        <y>-1</y>
+        <name>Farmer's Field</name>
+        <description>There are rows of corn here, with giant rats hiding between them.</description>
+        <monsters>
+            <monster name="Rat" probability="100"/>
+        </monsters>
+    </location>
+    <location>
+        <x>-1</x>
+        <y>-1</y>
+        <name>Farmer's House</name>
+        <description>This is the house of your neighbor, Farmer Ted.</description>
+        <trader name="Farmer Ted"/>
+    </location>
+    <location>
+        <x>0</x>
+        <y>-1</y>
+        <name>Home</name>
+        <description>This is your home.</description>
+    </location>
+    <location>
+        <x>-1</x>
+        <y>0</y>
+        <name>Trading Shop</name>
+        <description>The shop of Susan, the trader.</description>
+        <trader name="Susan"/>
+    </location>
+    <location>
+        <x>0</x>
+        <y>0</y>
+        <name>Town Square</name>
+        <description>You see a fountain here.</description>
+    </location>
+    <location>
+        <x>1</x>
+        <y>0</y>
+        <name>Town Gate</name>
+        <description>There is a gate here, protecting the town from giant spiders.</description>
+    </location>
+    <location>
+        <x>2</x>
+        <y>0</y>
+        <name>Spider Forest</name>
+        <description>The trees in this forest are covered with spider webs.</description>
+        <monsters>
+            <monster name="Spider" probability="100"/>
+        </monsters>
+    </location>
+    <location>
+        <x>0</x>
+        <y>1</y>
+        <name>Herbalist's Hut</name>
+        <description>You see a small hut, with plants drying from the roof.</description>
+        <quests>
+            <quest name="Clear the herb garden"/>
+        </quests>
+        <trader name="Pete the Herbalist"/>
+    </location>
+    <location>
+        <x>0</x>
+        <y>2</y>
+        <name>Herbalist's Garden</name>
+        <description>There are many plants here, with snakes hiding behind them.</description>
+        <monsters>
+            <monster name="Snake" probability="100"/>
+        </monsters>
+    </location>
+    <location>
+        <x>0</x>
+        <y>3</y>
+        <name>North Town</name>
+        <description>This is the town to the north.</description>
+    </location>
+</locations>

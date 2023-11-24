@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<quests>
+    <quest>
+        <name>Clear the herb garden</name>
+        <description>Defeat the snakes in the Herbalist's garden</description>
+        <task>
+            <collectItems>
+                <item name="Snake Fang" quantity="2"/>
+            </collectItems>
+        </task>
+        <reward>
+            <xp quantity="25"/>
+            <gold quantity="10"/>
+            <items>
+                <item name="Rusty Sword" quantity="1"/>
+            </items>
+        </reward>
+    </quest>
+</quests>

@@ -24,6 +24,7 @@ class CollectItemsQuestTask(
 
     override fun toString(): String {
         val stringBuilder = StringBuilder()
+        stringBuilder.append("Collect the items:\n")
         for ((itemName, qty) in itemsToComplete) {
             stringBuilder.append("$qty $itemName\n")
         }

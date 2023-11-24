@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<items>
+    <item>
+        <name>Pointy Stick</name>
+        <price>1</price>
+        <components>
+            <damageItemComponent>
+                <minimumDamage>1</minimumDamage>
+                <maximumDamage>2</maximumDamage>
+            </damageItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Rusty Sword</name>
+        <price>5</price>
+        <components>
+            <damageItemComponent>
+                <minimumDamage>1</minimumDamage>
+                <maximumDamage>3</maximumDamage>
+            </damageItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Snake Bite</name>
+        <price>0</price>
+        <components>
+            <damageItemComponent>
+                <minimumDamage>1</minimumDamage>
+                <maximumDamage>2</maximumDamage>
+            </damageItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Snake Fang</name>
+        <price>1</price>
+    </item>
+    <item>
+        <name>Snake Skin</name>
+        <price>2</price>
+    </item>
+    <item>
+        <name>Rat Bite</name>
+        <price>0</price>
+        <components>
+            <damageItemComponent>
+                <minimumDamage>1</minimumDamage>
+                <maximumDamage>2</maximumDamage>
+            </damageItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Rat Tail</name>
+        <price>1</price>
+    </item>
+    <item>
+        <name>Rat Fur</name>
+        <price>2</price>
+    </item>
+    <item>
+        <name>Spider Bite</name>
+        <price>0</price>
+        <components>
+            <damageItemComponent>
+                <minimumDamage>1</minimumDamage>
+                <maximumDamage>4</maximumDamage>
+            </damageItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Spider Fang</name>
+        <price>1</price>
+    </item>
+    <item>
+        <name>Spider Silk</name>
+        <price>2</price>
+    </item>
+    <item>
+        <name>Granola Bar</name>
+        <price>1</price>
+        <components>
+            <recoverHealthItemComponent>
+                <amountToRecover>2</amountToRecover>
+            </recoverHealthItemComponent>
+        </components>
+    </item>
+    <item>
+        <name>Oats</name>
+        <price>1</price>
+    </item>
+    <item>
+        <name>Honey</name>
+        <price>2</price>
+    </item>
+    <item>
+        <name>Raisins</name>
+        <price>2</price>
+    </item>
+</items>

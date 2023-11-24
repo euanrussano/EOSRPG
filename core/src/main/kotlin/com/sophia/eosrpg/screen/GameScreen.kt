@@ -10,12 +10,11 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import com.kotcrab.vis.ui.widget.tabbedpane.Tab
 import com.sophia.eosrpg.EOSRPG
 import com.sophia.eosrpg.model.Hero
 import com.sophia.eosrpg.model.InventoryHolderComponent
 import com.sophia.eosrpg.model.LivingEntityComponent
-import com.sophia.eosrpg.model.Location
+import com.sophia.eosrpg.model.location.Location
 import com.sophia.eosrpg.model.item.DamageItemComponent
 import com.sophia.eosrpg.model.item.ItemInstance
 import com.sophia.eosrpg.model.item.RecoverHealthItemComponent
@@ -179,7 +178,7 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
                                 table {
                                     monsterTable = this
                                     isVisible = false
-
+                                    it.grow()
                                     label("") { monsterNameLbl = this; it.colspan(2) }
                                     row()
                                     image("white") {
@@ -404,10 +403,19 @@ class GameScreen(val game: EOSRPG) : Screen, InputAdapter() {
         questsTable.add("Done?")
         questsTable.row()
         for ((quest, isDone) in questStatus) {
-            questsTable.add(quest.name).growX()
+            val questText = createQuestToolTipText(quest)
+            questsTable.add(scene2d.label(quest.name){
+                addListener(TextTooltip(questText, Scene2DSkin.defaultSkin).also {
+                    it.setInstant(true)
+                })
+            }).growX()
             questsTable.add(if(isDone) "Yes" else "False")
             questsTable.row()
         }
+    }
+
+    private fun createQuestToolTipText(quest: Quest): String? {
+        return "Quest ${quest.name}\n" + "task:${quest.task}" + "reward:${quest.reward}\n"
     }
 
     fun updateHeroInventory(inventory: List<ItemInstance>) {

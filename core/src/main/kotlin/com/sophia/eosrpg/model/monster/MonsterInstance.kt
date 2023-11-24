@@ -5,7 +5,7 @@ import com.sophia.eosrpg.model.item.ItemInstance
 
 class MonsterInstance(
     val monster : Monster,
-) : Entity() { //InventoryHolder
+) : Entity() {
 
     val weapon = ItemInstance(monster.weapon)
 
@@ -13,22 +13,8 @@ class MonsterInstance(
         weapon.performAction(this, entity)
     }
 
-    var listener: MonsterListener? = null
-//    override val inventory = Inventory(this)
-
-    interface MonsterListener {
-        fun updateMonsterInstance(monsterInstance: MonsterInstance)
-
-    }
-
     init {
         add(LivingEntityComponent(this, monster.maximumHitPoints))
         add(InventoryHolderComponent(this))
     }
-
-//    var hitPoints : Int = monster.maximumHitPoints
-//        set(value) {
-//            field = value
-//            listener?.updateMonsterInstance(this)
-//        }
 }

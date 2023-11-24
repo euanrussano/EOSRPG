@@ -7,56 +7,53 @@ import com.badlogic.gdx.ai.msg.Telegraph
 import com.badlogic.gdx.math.MathUtils
 import com.sophia.eosrpg.model.*
 import com.sophia.eosrpg.model.item.*
-import com.sophia.eosrpg.model.monster.MonsterFactory
-import com.sophia.eosrpg.model.monster.MonsterInstance
-import com.sophia.eosrpg.model.monster.MonsterInstanceFactory
-import com.sophia.eosrpg.model.monster.MonsterRepository
-import com.sophia.eosrpg.model.quest.Quest
-import com.sophia.eosrpg.model.quest.QuestFactory
+import com.sophia.eosrpg.model.item.factory.ItemFactory
+import com.sophia.eosrpg.model.item.factory.XMLItemFactory
+import com.sophia.eosrpg.model.location.LocationRepository
+import com.sophia.eosrpg.model.location.XMLLocationFactory
+import com.sophia.eosrpg.model.monster.*
 import com.sophia.eosrpg.model.quest.QuestRepository
-import com.sophia.eosrpg.model.recipe.Recipe
-import com.sophia.eosrpg.model.recipe.RecipeFactory
-import com.sophia.eosrpg.model.recipe.RecipeRepository
-import com.sophia.eosrpg.model.recipe.RecipeService
+import com.sophia.eosrpg.model.quest.XMLQuestFactory
+import com.sophia.eosrpg.model.recipe.*
 import com.sophia.eosrpg.model.trader.Trader
-import com.sophia.eosrpg.model.trader.TraderFactory
 import com.sophia.eosrpg.model.trader.TraderRepository
+import com.sophia.eosrpg.model.trader.XMLTraderFactory
 import com.sophia.eosrpg.screen.GameScreen
 
-class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListener, Telegraph { // Trader.TraderListener,
+class GamePresenter(val gameScreen: GameScreen) : Telegraph { // Trader.TraderListener,
 
-    val heroListener = HeroListenerPresenter(gameScreen)
+//    val heroListener = HeroListenerPresenter(gameScreen)
 
     val itemRepository = ItemRepository()
-    val itemFactory = ItemFactory(itemRepository)
+    //val itemFactory = ItemFactory(itemRepository)
+    val itemFactory : ItemFactory = XMLItemFactory(itemRepository)
     val itemInstanceFactory = ItemInstanceFactory(itemRepository)
 
     val recipeRepository = RecipeRepository()
-    val recipeFactory = RecipeFactory(recipeRepository, itemRepository)
+    val recipeFactory = XMLRecipeFactory(recipeRepository, itemRepository)
     val recipeService = RecipeService(recipeRepository, itemInstanceFactory)
 
     val questRepository = QuestRepository()
-    val questFactory = QuestFactory(questRepository, itemRepository)
+    val questFactory = XMLQuestFactory(questRepository, itemRepository)
 
     val traderRepository = TraderRepository()
-    val traderFactory = TraderFactory(traderRepository, itemInstanceFactory)
+    val traderFactory = XMLTraderFactory(traderRepository, itemInstanceFactory)
 
     private val monsterRepository = MonsterRepository()
-    private val monsterFactory = MonsterFactory(monsterRepository, itemRepository)
+    private val monsterFactory = XMLMonsterFactory(monsterRepository, itemRepository)
     private val monsterInstanceFactory = MonsterInstanceFactory(monsterRepository, itemInstanceFactory)
+
+    val locationRepository = LocationRepository()
+    val locationFactory = XMLLocationFactory(locationRepository, questRepository, traderRepository)
+
 
     var currentHero : Hero? = null
         set(value) {
-            field?.listener = null
             field = value
-            value?.listener = heroListener
             value?.let { gameScreen.updateHero(it) }
         }
 
-    val worldFactory = WorldFactory(questRepository, traderRepository)
-    var currentWorld = worldFactory.createWorld()
-
-    var currentLocation = currentWorld.locationAt(0, 0)!!
+    var currentLocation = locationRepository.locationAt(0, 0)!!
         set(value) {
             field = value
             gameScreen.updateLocation(currentLocation)
@@ -68,20 +65,18 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
 
     val hasLocationNorth : Boolean
-        get() = currentWorld.locationAt(currentLocation.x, currentLocation.y + 1) != null
+        get() = locationRepository.locationAt(currentLocation.x, currentLocation.y + 1) != null
     val hasLocationSouth : Boolean
-        get() = currentWorld.locationAt(currentLocation.x, currentLocation.y - 1) != null
+        get() = locationRepository.locationAt(currentLocation.x, currentLocation.y - 1) != null
     val hasLocationWest : Boolean
-        get() = currentWorld.locationAt(currentLocation.x-1, currentLocation.y) != null
+        get() = locationRepository.locationAt(currentLocation.x-1, currentLocation.y) != null
     val hasLocationEast : Boolean
-        get() = currentWorld.locationAt(currentLocation.x+1, currentLocation.y) != null
+        get() = locationRepository.locationAt(currentLocation.x+1, currentLocation.y) != null
 
     var currentMonsterInstance : MonsterInstance? = null
         set(value) {
-            value?.listener = null
             field = value
             field?.let {
-                it.listener = this@GamePresenter
                 gameScreen.updateMonsterInstance(it)
                 gameScreen.raiseMessage("");
                 gameScreen.raiseMessage("You see a ${it.monster.name} here!");
@@ -93,9 +88,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
     var currentTrader : Trader? = null
         set(value) {
-//            field?.listener = null
             field = value
-//            value?.listener = this
             if (field != null)
                 gameScreen.updateTrader(field!!)
             else
@@ -111,7 +104,12 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             Messages.EntityWasHealed.code,
             Messages.EntityWasHitEvent.code,
             Messages.EntityWasKilledEvent.code,
-            Messages.HeroLearntRecipeEvent.code
+            Messages.HeroLearntRecipeEvent.code,
+            Messages.HeroReceivedGoldEvent.code,
+            Messages.HeroSpentGoldEvent.code,
+            Messages.HeroCompletedQuestEvent.code,
+            Messages.HeroReceivedQuestEvent.code,
+            Messages.HeroGainedXP.code
             )
     }
 
@@ -192,33 +190,29 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     }
 
     fun moveHeroNorth() {
-        currentWorld.locationAt(currentLocation.x, currentLocation.y+1)?.let {
+        locationRepository.locationAt(currentLocation.x, currentLocation.y+1)?.let {
             currentLocation = it
         }
     }
 
     fun moveHeroSouth() {
-        currentWorld.locationAt(currentLocation.x, currentLocation.y-1)?.let {
+        locationRepository.locationAt(currentLocation.x, currentLocation.y-1)?.let {
             currentLocation = it
         }
 
     }
 
     fun moveHeroWest() {
-        currentWorld.locationAt(currentLocation.x-1, currentLocation.y)?.let {
+        locationRepository.locationAt(currentLocation.x-1, currentLocation.y)?.let {
             currentLocation = it
         }
 
     }
 
     fun moveHeroEast() {
-        currentWorld.locationAt(currentLocation.x+1, currentLocation.y)?.let {
+        locationRepository.locationAt(currentLocation.x+1, currentLocation.y)?.let {
             currentLocation = it
         }
-    }
-
-    override fun updateMonsterInstance(monsterInstance: MonsterInstance) {
-        gameScreen.updateMonsterInstance(monsterInstance)
     }
 
     fun changeHeroCurrentWeapon(weaponName: String?) {
@@ -241,48 +235,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         hero.useCurrentWeaponOn(monsterInstance)
         if (!LivingEntityComponent.get(monsterInstance).isDead){
             monsterInstance.useCurrentWeaponOn(hero)
-//            val damageToHero = MathUtils.random(monsterInstance.monster.minimumDamage, monsterInstance.monster.maximumDamage)
-//            if (damageToHero == 0){
-//                gameScreen.raiseMessage("Monster attacks, but misses you.")
-//            } else {
-//                LivingEntityComponent.get(hero).takeDamage(damageToHero)
-//
-//            }
         }
-//        val heroWeapon = hero.currentWeapon ?: return
-//        heroWeapon.performAction(hero, )
-//        val damageItemComponent = (heroWeapon.item as Item).get(DamageItemComponent::class) as DamageItemComponent
-//        val damageToMonster = MathUtils.random(damageItemComponent.minimumDamage, damageItemComponent.maximumDamage)
-//        if (damageToMonster == 0){
-//            gameScreen.raiseMessage("You missed the ${monsterInstance.monster.name}")
-//        } else {
-//            monsterInstance.hitPoints -= damageToMonster
-//            gameScreen.raiseMessage("You hit the ${monsterInstance.monster.name} for ${damageToMonster} points.")
-//        }
-
-//        if (monsterInstance.hitPoints <= 0){
-//            gameScreen.raiseMessage("")
-//            gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
-//            val xpPoints = monsterInstance.monster.rewardExperiencePoints
-//            hero.experiencePoints += xpPoints
-//            val gold = monsterInstance.monster.rewardGold
-//            hero.gold += gold
-//            for (itemInstance in monsterInstance.inventory.itemInstances) {
-//                hero.inventory.addItemInstanceToInventory(itemInstance)
-//            }
-//            getMonsterInstanceAtLocation()
-//        }
-//        else {
-//
-//        }
-
-//        if (hero.hitPoints <= 0){
-//            gameScreen.raiseMessage("")
-//            gameScreen.raiseMessage("You fainted!")
-//            currentLocation = currentWorld.locationAt(0, -1)!!
-//            hero.hitPoints = hero.level*10
-//
-//        }
 
     }
 
@@ -294,7 +247,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
         heroInventory.removeItemInstanceToInventory(itemInstance)
         traderInventory.addItemInstanceToInventory(itemInstance)
-        hero.gold += itemInstance.item.price
+        hero.receiveGold(itemInstance.item.price)
     }
 
     fun heroBuyItemInstance(itemInstance: ItemInstance) {
@@ -307,98 +260,9 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
 
         traderInventory.removeItemInstanceToInventory(itemInstance)
         heroInventory.addItemInstanceToInventory(itemInstance)
-        hero.gold -= itemInstance.item.price
+        hero.spendGold(itemInstance.item.price)
 
     }
-
-
-    class HeroListenerPresenter(val gameScreen: GameScreen) : Hero.HeroListener {
-//        override fun itemInstanceAddedToInventory(hero: Hero, itemInstance: ItemInstance) {
-//            gameScreen.updateHeroInventory(hero.inventory)
-//            gameScreen.updateHeroWeapons(hero.weapons)
-//            gameScreen.updateHeroCurrentWeapon(hero.currentWeapon)
-//            gameScreen.raiseMessage("You received a ${itemInstance.item.name}")
-//        }
-//
-//        override fun itemInstanceRemovedFromInventory(hero: Hero, itemInstance: ItemInstance) {
-//            gameScreen.updateHeroInventory(hero.inventory)
-//            gameScreen.raiseMessage("${itemInstance.item.name} removed from inventory")
-//        }
-
-        override fun heroGainedGold(hero: Hero, amountGained: Int) {
-            gameScreen.updateHeroGold(hero.gold)
-            gameScreen.raiseMessage("You received ${amountGained} gold.")
-        }
-
-        override fun heroLostGold(hero: Hero, amountLost: Int) {
-            gameScreen.updateHeroGold(hero.gold)
-            gameScreen.raiseMessage("You spent/lost ${amountLost} gold.")
-        }
-
-        override fun updateHeroName(hero: Hero) {
-            TODO("Not yet implemented")
-        }
-
-        override fun updateHeroClass(hero: Hero) {
-            TODO("Not yet implemented")
-        }
-
-//        override fun heroRecoveredHitPoints(hero: Hero, amountRecovered: Int) {
-//            gameScreen.updateHeroHitPoints(hero.hitPoints)
-//            gameScreen.raiseMessage("You recovered ${amountRecovered} hit points.")
-//        }
-
-        override fun heroGainedExperiencePoints(hero: Hero, amountGained: Int) {
-            gameScreen.updateHeroXP(hero.experiencePoints)
-            gameScreen.raiseMessage("You received ${amountGained} experience points.")
-        }
-
-        override fun heroLostExperiencePoints(hero: Hero, amountLost: Int) {
-            gameScreen.updateHeroXP(hero.experiencePoints)
-            gameScreen.raiseMessage("You lost ${amountLost} experience points.")
-        }
-
-        override fun heroUpgradedLevel(hero: Hero, amountGained: Int) {
-            gameScreen.updateHeroLevel(hero.level)
-            gameScreen.raiseMessage("You advanced to ${hero.level} level.")
-        }
-
-        override fun heroDowngradedLevel(hero: Hero, amountLost: Int) {
-            gameScreen.updateHeroLevel(hero.level)
-            gameScreen.raiseMessage("You downgraded to ${hero.level} level.")
-        }
-
-        override fun heroReceivedQuest(hero: Hero, quest: Quest) {
-            gameScreen.updateHeroQuests(hero.questStatus)
-            gameScreen.raiseMessage("")
-            gameScreen.raiseMessage("You receive the ${quest.name} quest")
-            gameScreen.raiseMessage(quest.description)
-            gameScreen.raiseMessage("Return with:\n")
-            gameScreen.raiseMessage(quest.task.toString())
-            gameScreen.raiseMessage("And you will receive:")
-            gameScreen.raiseMessage(quest.reward.toString())
-        }
-
-        override fun heroCompletedQuest(hero: Hero, quest: Quest) {
-            gameScreen.updateHeroQuests(hero.questStatus)
-            gameScreen.raiseMessage("")
-            gameScreen.raiseMessage("You have completed the ${quest.name} quest")
-        }
-
-//        override fun heroLostHitPoints(hero: Hero, amountLost: Int) {
-//            gameScreen.updateHeroHitPoints(hero.hitPoints)
-//            gameScreen.raiseMessage("You were hit for ${amountLost} hit points.")
-//        }
-
-    }
-
-//    override fun itemInstanceAddedToInventory(trader: Trader, itemInstance: ItemInstance) {
-//        gameScreen.updateTrader(trader)
-//    }
-//
-//    override fun itemInstanceRemovedFromInventory(trader: Trader, itemInstance: ItemInstance) {
-//        gameScreen.updateTrader(trader)
-//    }
 
     override fun handleMessage(msg: Telegram): Boolean {
         when(msg.message){
@@ -410,9 +274,66 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             Messages.EntityWasHitEvent.code -> return onEntityWasHit(msg.extraInfo as Messages.EntityWasHitEvent)
             Messages.EntityWasKilledEvent.code -> return onEntityWasKilledEvent(msg.extraInfo as Messages.EntityWasKilledEvent)
             Messages.HeroLearntRecipeEvent.code -> return onHeroLearntRecipe(msg.extraInfo as Messages.HeroLearntRecipeEvent)
+            Messages.HeroReceivedGoldEvent.code -> return onHeroReceivedGoldEvent(msg.extraInfo as Messages.HeroReceivedGoldEvent)
+            Messages.HeroSpentGoldEvent.code -> return onHeroSpentGoldEvent(msg.extraInfo as Messages.HeroSpentGoldEvent)
+            Messages.HeroCompletedQuestEvent.code -> return onHeroCompletedQuestEvent(msg.extraInfo as Messages.HeroCompletedQuestEvent)
+            Messages.HeroReceivedQuestEvent.code -> return onHeroReceivedQuestEvent(msg.extraInfo as Messages.HeroReceivedQuestEvent)
+            Messages.HeroGainedXP.code -> return onHeroGainedXP(msg.extraInfo as Messages.HeroGainedXP)
             else -> Gdx.app.error(this::class.simpleName, "No call for event ${msg.extraInfo}")
         }
         return false
+    }
+
+    private fun onHeroGainedXP(event: Messages.HeroGainedXP): Boolean {
+        val hero = event.hero
+        val amount = event.amount
+
+        gameScreen.updateHeroXP(hero.experiencePoints)
+        gameScreen.raiseMessage("You received ${amount} experience points.")
+
+        return true
+    }
+
+    private fun onHeroReceivedGoldEvent(event: Messages.HeroReceivedGoldEvent): Boolean {
+        val hero = event.hero
+        val amount = event.amount
+
+        gameScreen.updateHeroGold(hero.gold)
+        gameScreen.raiseMessage("You received $amount gold.")
+        return true
+    }
+
+    private fun onHeroSpentGoldEvent(event : Messages.HeroSpentGoldEvent) : Boolean{
+        val hero = event.hero
+        val gold = event.amount
+
+        gameScreen.updateHeroGold(hero.gold)
+        gameScreen.raiseMessage("You received ${gold} gold.")
+        return true
+    }
+
+    private fun onHeroCompletedQuestEvent(event: Messages.HeroCompletedQuestEvent) : Boolean{
+        val hero = event.hero
+        val quest = event.quest
+
+        gameScreen.updateHeroQuests(hero.questStatus)
+        gameScreen.raiseMessage("")
+        gameScreen.raiseMessage("You have completed the ${quest.name} quest")
+        return true
+    }
+
+    private fun onHeroReceivedQuestEvent(event : Messages.HeroReceivedQuestEvent) : Boolean{
+        val hero = event.hero
+        val quest = event.quest
+
+        gameScreen.updateHeroQuests(hero.questStatus)
+        gameScreen.raiseMessage("")
+        gameScreen.raiseMessage("You receive the ${quest.name} quest")
+        gameScreen.raiseMessage(quest.description)
+        gameScreen.raiseMessage(quest.task.toString())
+        gameScreen.raiseMessage("And you will receive:")
+        gameScreen.raiseMessage(quest.reward.toString())
+        return true
     }
 
     private fun onHeroLearntRecipe(event: Messages.HeroLearntRecipeEvent): Boolean {
@@ -426,7 +347,7 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
         if (event.owner == currentHero){
             gameScreen.raiseMessage("")
             gameScreen.raiseMessage("You fainted!")
-            currentLocation = currentWorld.locationAt(0, -1)!!
+            currentLocation = locationRepository.locationAt(0, -1)!!
             LivingEntityComponent.get(event.owner).fullyHeal()
             return true
         } else if (event.owner is MonsterInstance){
@@ -435,9 +356,9 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
             gameScreen.raiseMessage("")
             gameScreen.raiseMessage("You defeated the ${monsterInstance.monster.name}")
             val xpPoints = monsterInstance.monster.rewardExperiencePoints
-            hero.experiencePoints += xpPoints
+            hero.increaseXP(xpPoints)
             val gold = monsterInstance.monster.rewardGold
-            hero.gold += gold
+            hero.receiveGold(gold)
             val heroInventory = InventoryHolderComponent.get(hero)
             val monsterInventory = InventoryHolderComponent.get(monsterInstance)
             for (itemInstance in monsterInventory.itemInstances) {
@@ -472,7 +393,12 @@ class GamePresenter(val gameScreen: GameScreen) : MonsterInstance.MonsterListene
     }
 
     private fun onEntityWasFullyHealed(event: Messages.EntityWasFullyHealed): Boolean {
-        //TODO("Not yet implemented")
+        val owner = event.owner
+        if (owner == currentHero){
+            gameScreen.updateHero(owner as Hero)
+            gameScreen.raiseMessage("You were fully healed!")
+            return true
+        }
         return false
     }
 

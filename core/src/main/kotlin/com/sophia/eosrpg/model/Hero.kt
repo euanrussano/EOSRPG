@@ -15,27 +15,7 @@ class Hero(
     experiencePoints : Int,
     level : Int,
     gold : Int
-) :  Entity() { //InventoryHolder,
-
-
-    var listener : HeroListener? = null
-
-    interface HeroListener {
-        fun heroGainedGold(hero: Hero, amountGained : Int)
-        fun heroLostGold(hero: Hero, amountLost : Int)
-        fun updateHeroName(hero: Hero)
-        fun updateHeroClass(hero: Hero)
-//        fun heroLostHitPoints(hero: Hero, amountLost : Int)
-//        fun heroRecoveredHitPoints(hero: Hero, amountRecovered : Int)
-        fun heroGainedExperiencePoints(hero: Hero, amountGained: Int)
-        fun heroLostExperiencePoints(hero: Hero, amountLost: Int)
-        fun heroUpgradedLevel(hero: Hero, amountGained: Int)
-        fun heroDowngradedLevel(hero: Hero, amountLost: Int)
-        fun heroReceivedQuest(hero: Hero, quest: Quest)
-        fun heroCompletedQuest(hero: Hero, quest: Quest)
-
-
-    }
+) :  Entity() {
 
     init {
         add(LivingEntityComponent(this, 10))
@@ -45,54 +25,47 @@ class Hero(
     var name : String = name
         set(value) {
             field = value
-            listener?.updateHeroName(this)
         }
     var characterClass : String = characterClass
         set(value) {
             field = value
-            listener?.updateHeroClass(this)
         }
 
-//    var hitPoints : Int = hitPoints
-//        set(value) {
-//            val diff = value - field
-//            field = value
-//            if (diff > 0)
-//                listener?.heroRecoveredHitPoints(this, diff)
-//            else
-//                listener?.heroLostHitPoints(this, diff)
-//        }
-    var experiencePoints : Int = experiencePoints
-        set(value) {
-            val diff = value - field
-            field = value
-            if (diff > 0)
-                listener?.heroGainedExperiencePoints(this, diff)
-            else
-                listener?.heroLostExperiencePoints(this, diff)
-        }
-    var level : Int = level
-        set(value) {
-            val diff = value - field
-            field = value
-            if (diff > 0)
-                listener?.heroUpgradedLevel(this, diff)
-            else
-                listener?.heroDowngradedLevel(this, diff)
-        }
+    var __experiencePoints : Int = experiencePoints
+    val experiencePoints : Int
+        get() = __experiencePoints
 
-    var gold : Int = gold
-        set(value) {
-            val diff = value - field
-            field = value
-            if (diff > 0)
-                listener?.heroGainedGold(this, diff)
-            else
-                listener?.heroLostGold(this, diff)
-        }
+    fun increaseXP(amount : Int){
+        __experiencePoints += amount
+        val event = Messages.HeroGainedXP(this, amount)
+        val code = Messages.HeroGainedXP.code
+        MessageManager.getInstance().dispatchMessage(code, event)
+    }
 
+    private var __level : Int = level
+    val level : Int; get() = __level
+    fun raiseLevel(){
+        __level += 1
+        val event = Messages.HeroGainedLevel(this)
+        val code = Messages.HeroGainedLevel.code
+        MessageManager.getInstance().dispatchMessage(code, event)
+    }
 
-//    override val inventory = Inventory(this)
+    private var __gold : Int = gold
+    val gold : Int; get() = __gold
+    fun receiveGold(amount : Int){
+        __gold += amount
+        val event = Messages.HeroReceivedGoldEvent(this, amount)
+        val code = Messages.HeroReceivedGoldEvent.code
+        MessageManager.getInstance().dispatchMessage(code, event)
+    }
+
+    fun spendGold(amount : Int){
+        __gold -= amount
+        val event = Messages.HeroSpentGoldEvent(this, amount)
+        val code = Messages.HeroSpentGoldEvent.code
+        MessageManager.getInstance().dispatchMessage(code, event)
+    }
 
     private var __questStatus = mutableMapOf<Quest, Boolean>()
     val questStatus : Map<Quest, Boolean>
@@ -101,7 +74,9 @@ class Hero(
     fun assignQuest(quest : Quest){
         if (quest !in questStatus){
             __questStatus[quest] = false
-            listener?.heroReceivedQuest(this, quest)
+            val event = Messages.HeroReceivedQuestEvent(this, quest)
+            val code = Messages.HeroReceivedQuestEvent.code
+            MessageManager.getInstance().dispatchMessage(code, event)
         }
     }
     fun hasQuestNotCompleted(quest: Quest): Boolean {
@@ -111,7 +86,9 @@ class Hero(
     fun markQuestAsComplete(quest: Quest) {
         if (quest in questStatus){
             __questStatus[quest] = true
-            listener?.heroCompletedQuest(this, quest)
+            val event = Messages.HeroCompletedQuestEvent(this, quest)
+            val code = Messages.HeroCompletedQuestEvent.code
+            MessageManager.getInstance().dispatchMessage(code, event)
         }
 
     }

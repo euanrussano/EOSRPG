@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<traders>
+    <trader>
+        <name>Susan</name>
+        <inventory>
+            <item name="Rusty Sword" quantity="1"/>
+        </inventory>
+    </trader>
+    <trader>
+        <name>Farmer Ted</name>
+        <inventory>
+            <item name="Rusty Sword" quantity="1"/>
+        </inventory>
+    </trader>
+    <trader>
+        <name>Pete the Herbalist</name>
+        <inventory>
+            <item name="Rusty Sword" quantity="10"/>
+            <item name="Granola Bar" quantity="10"/>
+        </inventory>
+    </trader>
+</traders>

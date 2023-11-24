@@ -7,7 +7,7 @@ class GoldQuestReward(
 ) : QuestReward {
 
     override fun giveTo(hero: Hero) {
-        hero.gold += rewardGold
+        hero.receiveGold(rewardGold)
     }
 
     override fun toString(): String {

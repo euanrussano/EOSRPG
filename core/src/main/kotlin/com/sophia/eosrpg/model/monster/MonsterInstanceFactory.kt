@@ -18,7 +18,7 @@ class MonsterInstanceFactory(
 
         var runningTotal = 0
         val p = MathUtils.random()
-        for ((itemName, prob) in monster.itemProbability) {
+        for ((itemName, prob) in monster.lootItems) {
             runningTotal += prob
             if (p <= runningTotal/100f){
                 val itemInstance = itemInstanceFactory.createItemInstance(itemName)

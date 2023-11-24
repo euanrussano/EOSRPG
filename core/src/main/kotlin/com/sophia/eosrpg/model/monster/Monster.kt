@@ -7,7 +7,7 @@ class Monster(
     val maximumHitPoints : Int,
     val rewardExperiencePoints : Int,
     val rewardGold : Int,
-    val itemProbability : Map<String, Int>,
+    val lootItems : Map<String, Int>,
     val weapon : Item
 ) {
 }

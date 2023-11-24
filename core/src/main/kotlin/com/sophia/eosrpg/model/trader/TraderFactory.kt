@@ -1,7 +1,6 @@
 package com.sophia.eosrpg.model.trader
 
 import com.sophia.eosrpg.model.InventoryHolderComponent
-import com.sophia.eosrpg.model.item.ItemFactory
 import com.sophia.eosrpg.model.item.ItemInstanceFactory
 
 

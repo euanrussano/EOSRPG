@@ -1,6 +1,7 @@
 package com.sophia.eosrpg.model
 
 import com.sophia.eosrpg.model.item.ItemInstance
+import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.recipe.Recipe
 
 object Messages {
@@ -59,10 +60,49 @@ object Messages {
         }
     }
     //------------ ENTITY EVENT END ------------------
+
+    //------------ HERO EVENT END ------------------
     class HeroLearntRecipeEvent(val hero: Hero, val recipe: Recipe) {
         companion object{
             val code : Int = nextInt()
         }
     }
+
+    class HeroReceivedQuestEvent(val hero: Hero, val quest: Quest) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class HeroCompletedQuestEvent(val hero: Hero, val quest: Quest) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class HeroReceivedGoldEvent(val hero: Hero, val amount: Int) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class HeroSpentGoldEvent(val hero: Hero, val amount: Int) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class HeroGainedXP(val hero: Hero, val amount: Int) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
+    class HeroGainedLevel(val hero: Hero) {
+        companion object{
+            val code : Int = nextInt()
+        }
+    }
+
 
 }

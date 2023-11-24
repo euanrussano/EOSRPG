@@ -1,4 +1,4 @@
-package com.sophia.eosrpg.model
+package com.sophia.eosrpg.model.location
 
 import com.sophia.eosrpg.model.quest.Quest
 import com.sophia.eosrpg.model.trader.Trader

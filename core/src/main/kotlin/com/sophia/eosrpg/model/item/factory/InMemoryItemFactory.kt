@@ -1,8 +1,13 @@
-package com.sophia.eosrpg.model.item
+package com.sophia.eosrpg.model.item.factory
 
-class ItemFactory (
-    val itemRepository : ItemRepository
-){
+import com.sophia.eosrpg.model.item.DamageItemComponent
+import com.sophia.eosrpg.model.item.Item
+import com.sophia.eosrpg.model.item.ItemRepository
+import com.sophia.eosrpg.model.item.RecoverHealthItemComponent
+
+class InMemoryItemFactory (
+    override val itemRepository : ItemRepository
+) : ItemFactory{
 
     init {
         val items = listOf<Item>(

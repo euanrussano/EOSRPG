@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<recipes>
+    <recipe>
+        <name>Granola Bar</name>
+        <ingredients>
+            <item name="Oats" quantity="1"/>
+            <item name="Honey" quantity="1"/>
+            <item name="Raisins" quantity="1"/>
+        </ingredients>
+        <outputs>
+            <item name="Granola Bar" quantity="1"/>
+        </outputs>
+    </recipe>
+</recipes>
+

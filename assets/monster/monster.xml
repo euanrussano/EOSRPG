@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<monsters RootImagePath="/Images/monsters/">
+    <monster>
+        <name>Snake</name>
+        <maximumHitPoints>4</maximumHitPoints>
+        <rewardXP>5</rewardXP>
+        <rewardGold>1</rewardGold>
+        <weapon name="Snake Bite"/>
+        <lootItems>
+            <lootItem name="Snake Fang" probability="25"/>
+            <lootItem name="Snake Skin" probability="75"/>
+        </lootItems>
+    </monster>
+    <monster>
+        <name>Rat</name>
+        <maximumHitPoints>5</maximumHitPoints>
+        <rewardXP>5</rewardXP>
+        <rewardGold>1</rewardGold>
+        <weapon name="Rat Bite"/>
+        <lootItems>
+            <lootItem name="Rat Tail" probability="25"/>
+            <lootItem name="Rat Fur" probability="75"/>
+        </lootItems>
+    </monster>
+    <monster>
+        <name>Spider</name>
+        <maximumHitPoints>10</maximumHitPoints>
+        <rewardXP>10</rewardXP>
+        <rewardGold>3</rewardGold>
+        <weapon name="Spider Bite"/>
+        <lootItems>
+            <lootItem name="Spider Fang" probability="25"/>
+            <lootItem name="Spider Silk" probability="75"/>
+        </lootItems>
+    </monster>
+</monsters>

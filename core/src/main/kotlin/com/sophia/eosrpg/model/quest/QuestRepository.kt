@@ -11,4 +11,8 @@ class QuestRepository {
     fun findByName(name: String): Quest {
         return quests.first { quest -> quest.name == name }
     }
+
+    fun saveAll(vararg quests: Quest) {
+        this.quests.addAll(quests)
+    }
 }

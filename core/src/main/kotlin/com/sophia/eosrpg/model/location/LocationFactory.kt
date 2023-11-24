@@ -1,13 +1,14 @@
-package com.sophia.eosrpg.model
+package com.sophia.eosrpg.model.location
 
 import com.sophia.eosrpg.model.quest.QuestRepository
 import com.sophia.eosrpg.model.trader.TraderRepository
 
-class WorldFactory(
+class LocationFactory(
+    val locationRepository: LocationRepository,
     val questRepository: QuestRepository,
     val traderRepository: TraderRepository
 ) {
-    fun createWorld(): World {
+    init {
         val locations = listOf(
             Location(-2, -1, "Farmer's Field",
                 "There are rows of corn growing here, with giant rats hiding between them.",
@@ -44,7 +45,7 @@ class WorldFactory(
                 monsterProbability = mapOf("Snake" to 100)
             )
         )
-        return World(locations)
+        locationRepository.saveAll(*locations.toTypedArray())
     }
 
 }

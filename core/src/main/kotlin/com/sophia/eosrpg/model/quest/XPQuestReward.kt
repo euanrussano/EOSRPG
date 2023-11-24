@@ -8,7 +8,7 @@ class XPQuestReward(
 ) : QuestReward {
 
     override fun giveTo(hero: Hero) {
-        hero.experiencePoints += experiencePoints
+        hero.increaseXP(experiencePoints)
     }
 
     override fun toString(): String {
